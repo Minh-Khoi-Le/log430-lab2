@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    container_name: lab2-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      # - DATABASE_URL=sqlite:/app/prisma/dev.db (ou autre selon config Prisma)
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./frontend
+    container_name: lab2-frontend
+    ports:
+      - "5173:80" # 80 dans le container Nginx, 5173 en local
+    depends_on:
+      - backend
+
+
