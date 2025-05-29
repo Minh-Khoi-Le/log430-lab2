@@ -29,7 +29,7 @@
   min-width: 220px;
   max-width: 300px;
   width: 240px;
-  margin: 0px 20px;
+  margin: 20px 20px;
   background: #e0e0e0;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   border: none;
@@ -102,3 +102,47 @@
   height: 100%;
   gap: 32px;
 }
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 32px 28px 24px 28px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  min-width: 320px;
+  max-width: 90vw;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+  gap: 18px;
+}
+.btn {
+  padding: 7px 20px;
+  border-radius: 6px;
+  border: none;
+  background: #f1f1f1;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.1s;
+}
+.btn:hover {
+  background: #dedede;
+}
+.btn-danger {
+  background: #f44336;
+  color: #fff;
+}
+.btn-danger:hover {
+  background: #cc372b;
+}
+

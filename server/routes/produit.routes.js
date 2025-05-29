@@ -6,6 +6,7 @@ const router = express.Router();
 // Liste tous les produits
 router.get('/', async (req, res) => {
   const produits = await ProduitDAO.getAll();
+    console.log("Produits retournés:", produits);
   res.json(produits);
 });
 

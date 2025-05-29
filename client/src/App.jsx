@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import ProductSearch from "./components/ProductSearch";
 import ProductList from "./components/ProductList";
 import "./index.css";
+import Modal from "./components/Modal";
 
 const App = () => {
   const [produits, setProduits] = useState([]);
   const [search, setSearch] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [produitASupprimer, setProduitASupprimer] = useState(null);
 
   // Chargement des produits depuis l'API
   const fetchProduits = async () => {
@@ -31,27 +34,25 @@ const App = () => {
   );
 
   //Foncttion pour supprimer un produit
-  const handleDelete = async (produit) => {
-    if (
-      !window.confirm(`Êtes-vous sûr de vouloir supprimer ${produit.nom} ?`)
-    ) {
-      return;
-    }
+  const handleDelete = (produit) => {
+    setProduitASupprimer(produit);
+    setModalOpen(true);
+  };
 
-    try {
-      const response = await fetch(
-        `http://localhost:3800/produits/${produit.id}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (!response.ok) {
-        throw new Error("Erreur lors de la suppression du produit");
-      }
-      setProduits(produits.filter((p) => p.id !== produit.id));
-    } catch (error) {
-      console.error("Erreur:", error);
-    }
+  // Fonction pour confirmer la suppression
+  const confirmDelete = async () => {
+    await fetch(`http://localhost:3800/produits/${produitASupprimer.id}`, {
+      method: "DELETE",
+    });
+    setModalOpen(false);
+    setProduitASupprimer(null);
+    fetchProduits();
+  };
+
+  // Fonction pour annuler la suppression
+  const cancelDelete = () => {
+    setModalOpen(false);
+    setProduitASupprimer(null);
   };
 
   return (
@@ -141,6 +142,16 @@ const App = () => {
         }}
       >
         <ProductList produits={produitsFiltres} onDelete={handleDelete} />
+        <Modal
+          open={modalOpen}
+          title="Confirmation de suppression"
+          onClose={cancelDelete}
+          onConfirm={confirmDelete}
+        >
+          <div style={{ margin: "16px 0 0 0" }}>
+            Êtes-vous sûr de vouloir supprimer <b>{produitASupprimer?.nom}</b> ?
+          </div>
+        </Modal>
       </div>
     </div>
   );
