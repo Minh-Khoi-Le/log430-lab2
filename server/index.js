@@ -1,15 +1,16 @@
 const express = require('express');
 const cors = require('cors');
-const { PrismaClient } = require('@prisma/client');
+const produitRoutes = require('./routes/produit.routes');
 
 const app = express();
-const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
 
+app.use('/produits', produitRoutes);
 
-const PORT = process.env.PORT || 3800;
+
+const PORT = 3800;
 app.listen(PORT, () => {
-  console.log(`Serveur backend écoute sur http://localhost:${PORT}`);
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
