@@ -66,18 +66,15 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
                 onDelete?.(produit);
               }}
             >
-              <img
-                src="/icon _x.svg"
-                alt="Supprimer"
-                width={26}
-                height={26}
-              />
+              <img src="/icon _x.svg" alt="Supprimer" width={26} height={26} />
             </button>
           </div>
         )}
       </div>
       <div className="product-card-info">
-        <span>{produit.nom}</span>
+        <span>
+          {produit.nom} x {produit.stock}
+        </span>
         <span>${produit.prix.toFixed(2)}</span>
       </div>
     </div>

@@ -3,12 +3,15 @@ import ProductSearch from "./components/ProductSearch";
 import ProductList from "./components/ProductList";
 import "./index.css";
 import Modal from "./components/Modal";
+import ProductEditForm from "./components/ProductEditForm";
 
 const App = () => {
   const [produits, setProduits] = useState([]);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [produitASupprimer, setProduitASupprimer] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [produitAModifier, setProduitAModifier] = useState(null);
 
   // Chargement des produits depuis l'API
   const fetchProduits = async () => {
@@ -28,12 +31,12 @@ const App = () => {
     fetchProduits();
   }, []);
 
-  // Filtre sur le nom (insensible à la casse)
+  // Filtre sur le nom 
   const produitsFiltres = produits.filter((p) =>
     p.nom.toLowerCase().includes(search.toLowerCase())
   );
 
-  //Foncttion pour supprimer un produit
+  //Fonction pour supprimer un produit
   const handleDelete = (produit) => {
     setProduitASupprimer(produit);
     setModalOpen(true);
@@ -53,6 +56,30 @@ const App = () => {
   const cancelDelete = () => {
     setModalOpen(false);
     setProduitASupprimer(null);
+  };
+
+  // Fonction pour modifier un produit
+  const handleEdit = (produit) => {
+    setProduitAModifier(produit);
+    setEditModalOpen(true);
+  };
+
+  // Fonction pour enregistrer les modifications
+  const saveEdit = async (majProduit) => {
+    await fetch(`http://localhost:3800/produits/${majProduit.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(majProduit),
+    });
+    setEditModalOpen(false);
+    setProduitAModifier(null);
+    fetchProduits();
+  };
+
+  //fonction pour annuler la modification
+  const cancelEdit = () => {
+    setEditModalOpen(false);
+    setProduitAModifier(null);
   };
 
   return (
@@ -141,7 +168,23 @@ const App = () => {
           boxSizing: "border-box",
         }}
       >
-        <ProductList produits={produitsFiltres} onDelete={handleDelete} />
+        <ProductList
+          produits={produitsFiltres}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
+
+        <Modal
+          open={editModalOpen}
+          title="Modification du produit"
+          onClose={cancelEdit}
+        >
+          <ProductEditForm
+            produit={produitAModifier}
+            onSave={saveEdit}
+            onCancel={cancelEdit}
+          />
+        </Modal>
         <Modal
           open={modalOpen}
           title="Confirmation de suppression"

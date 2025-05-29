@@ -8,10 +8,13 @@ const Modal = ({ open, title, children, onClose, onConfirm }) => {
       <div className="modal-content">
         {title && <h2>{title}</h2>}
         <div>{children}</div>
-        <div className="modal-actions">
-          <button className="btn" onClick={onClose}>Annuler</button>
-          <button className="btn btn-danger" onClick={onConfirm}>Confirmer</button>
-        </div>
+        {/* N'affiche la barre d'action que si onConfirm est défini */}
+        {onConfirm && (
+          <div className="modal-actions">
+            <button className="btn" onClick={onClose}>Annuler</button>
+            <button className="btn btn-danger" onClick={onConfirm}>Confirmer</button>
+          </div>
+        )}
       </div>
     </div>
   );
