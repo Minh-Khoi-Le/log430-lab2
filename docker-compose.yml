@@ -1,0 +1,17 @@
+services:
+  server:
+    build: ./server
+    container_name: log430-server
+    ports:
+      - "3800:3800"
+    environment:
+      - NODE_ENV=production
+
+
+  client:
+    build: ./client
+    container_name: log430-client
+    ports:
+      - "5173:80"  
+    depends_on:
+      - server
