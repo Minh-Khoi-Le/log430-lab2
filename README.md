@@ -43,8 +43,7 @@ docker-compose up --build
 Pour injecter 10 produits automatiquement :
 
 ```bash
-cd server
-npm run seed
+docker-compose exec server npm run seed
 ```
 
 ## Utilisation (fonctionnalités)
