@@ -6,6 +6,7 @@ services:
       - "3800:3800"
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=file:./dev.db
 
 
   client:
