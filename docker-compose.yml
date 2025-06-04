@@ -1,18 +1,36 @@
+version: "3"
 services:
+  db:
+    image: postgres:15
+    restart: always
+    container_name: log430-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: magasin_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
   server:
     build: ./server
     container_name: log430-server
     ports:
       - "3800:3800"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=file:./dev.db
-
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/magasin_db"
+    depends_on:
+      - db
 
   client:
     build: ./client
     container_name: log430-client
     ports:
-      - "5173:80"  
+      - "5173:80"
     depends_on:
       - server
+
+volumes:
+  db-data:

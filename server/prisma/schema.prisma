@@ -6,14 +6,77 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Produit {
-  id     Int    @id @default(autoincrement())
-  nom    String
-  prix   Float
-  stock  Int
+
+model Magasin {
+  id        Int      @id @default(autoincrement())
+  nom       String
+  adresse   String?
+  stocks    Stock[]
+  ventes    Vente[]
+  demandesRestock Restock[] @relation("DemandeMagasin")
 }
+
+model Produit {
+  id        Int      @id @default(autoincrement())
+  nom       String
+  prix      Float
+  description String?
+  stocks    Stock[]
+  lignesVente LigneVente[]
+  restocks  Restock[]
+}
+
+model Stock {
+  id         Int      @id @default(autoincrement())
+  magasin    Magasin  @relation(fields: [magasinId], references: [id])
+  magasinId  Int
+  produit    Produit  @relation(fields: [produitId], references: [id])
+  produitId  Int
+  quantite   Int
+  @@unique([magasinId, produitId])
+}
+
+model Client {
+  id      Int    @id @default(autoincrement())
+  nom     String
+  email   String @unique
+  ventes  Vente[]
+}
+
+model Vente {
+  id         Int         @id @default(autoincrement())
+  magasin    Magasin     @relation(fields: [magasinId], references: [id])
+  magasinId  Int
+  client     Client      @relation(fields: [clientId], references: [id])
+  clientId   Int
+  date       DateTime    @default(now())
+  lignes     LigneVente[]
+  total      Float
+}
+
+model LigneVente {
+  id        Int      @id @default(autoincrement())
+  vente     Vente    @relation(fields: [venteId], references: [id])
+  venteId   Int
+  produit   Produit  @relation(fields: [produitId], references: [id])
+  produitId Int
+  quantite  Int
+  prixUnitaire Float
+}
+
+model Restock {
+  id           Int      @id @default(autoincrement())
+  produit      Produit  @relation(fields: [produitId], references: [id])
+  produitId    Int
+  magasin      Magasin  @relation("DemandeMagasin", fields: [magasinId], references: [id])
+  magasinId    Int
+  quantite     Int
+  statut       String   // ex: "EN_ATTENTE", "ACCEPTE", "REFUSE"
+  createdAt    DateTime @default(now())
+}
+
 
