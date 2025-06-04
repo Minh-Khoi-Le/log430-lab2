@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ProductSearch from "./components/ProductSearch";
 import ProductList from "./components/ProductList";
-import "./index.css";
+import ".assets/index.css";
 import Modal from "./components/Modal";
 import ProductEditForm from "./components/ProductEditForm";
 
