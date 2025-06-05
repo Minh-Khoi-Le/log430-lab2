@@ -22,6 +22,13 @@ const magasins = [
   { nom: "Magasin E" },
 ];
 
+// Quelques clients fictifs
+const clients = [
+  { nom: "Alice", email: "alice@mail.com" },
+  { nom: "Bob", email: "bob@mail.com" },
+  { nom: "Chloé", email: "chloe@mail.com" }
+];
+
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -33,14 +40,17 @@ async function main() {
   await prisma.stock?.deleteMany?.();
   await prisma.magasin.deleteMany({});
   await prisma.produit.deleteMany({});
+  await prisma.client?.deleteMany?.();
 
-  // Insérer produits & magasins
-  const produitsCreated = await prisma.produit.createMany({ data: produits });
-  const magasinsCreated = await prisma.magasin.createMany({ data: magasins });
+  // Insérer produits, magasins et clients
+  await prisma.produit.createMany({ data: produits });
+  await prisma.magasin.createMany({ data: magasins });
+  await prisma.client.createMany({ data: clients });
 
-  // On récupère les produits et magasins insérés
+  // On récupère les produits, magasins et clients insérés
   const produitsList = await prisma.produit.findMany();
   const magasinsList = await prisma.magasin.findMany();
+  const clientsList = await prisma.client.findMany();
 
   // Création des stocks pour chaque produit X magasin
   for (const magasin of magasinsList) {
@@ -49,34 +59,48 @@ async function main() {
         data: {
           produitId: produit.id,
           magasinId: magasin.id,
-          quantite: getRandomInt(5, 100) // stock random
+          quantite: getRandomInt(20, 100) // stock random
         }
       });
     }
   }
 
-  // MOCK stats pour démo UI (exemple seulement — à adapter pour tes besoins API)
-  const stats = magasinsList.map((magasin, i) => {
-    const ventesTotal = getRandomInt(20, 70);
-    const produitsVendus = getRandomInt(80, 200);
-    const stocksFaibles = produitsList
-      .filter(() => Math.random() < 0.2) // ~20% des produits en faible stock
-      .map(p => p.nom);
-    const chiffreAffaires = getRandomInt(1500, 5000) + Math.random();
-    return {
-      id: magasin.id,
-      nom: magasin.nom,
-      ventesTotal,
-      produitsVendus,
-      stocksFaibles,
-      chiffreAffaires,
-    };
-  });
+  // Génération de ventes aléatoires pour chaque magasin
+  for (const magasin of magasinsList) {
+    const nbVentes = getRandomInt(5, 10); // 5 à 10 ventes par magasin
+    for (let v = 0; v < nbVentes; v++) {
+      // Client au hasard
+      const client = clientsList[getRandomInt(0, clientsList.length - 1)];
+      // 1 à 4 produits différents par vente
+      const produitsChoisis = [...produitsList]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, getRandomInt(1, 4));
 
- // écrire dans un fichier pour mock API stats UI
-  require('fs').writeFileSync('./mock.stats.json', JSON.stringify(stats, null, 2));
+      // Générer lignes de vente
+      const lignes = produitsChoisis.map(produit => ({
+        produitId: produit.id,
+        quantite: getRandomInt(1, 5),
+        prixUnitaire: produit.prix
+      }));
 
-  console.log("Données seedées avec stats mock !");
+      // Calcule le total de la vente
+      const total = lignes.reduce((acc, l) => acc + l.quantite * l.prixUnitaire, 0);
+
+      // Crée la vente avec ses lignes associées
+      await prisma.vente.create({
+        data: {
+          magasinId: magasin.id,
+          clientId: client.id,
+          total,
+          lignes: {
+            create: lignes
+          }
+        }
+      });
+    }
+  }
+
+  console.log("Données seedées (produits, magasins, stocks, clients, ventes) !");
 }
 
 main()

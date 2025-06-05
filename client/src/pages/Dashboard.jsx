@@ -17,34 +17,11 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    // Simule l’API (mock)
-    const fakeStats = [
-      {
-        id: 1,
-        nom: "Magasin A",
-        ventesTotal: 42,
-        produitsVendus: 120,
-        stocksFaibles: ["Baguette", "Lait"],
-        chiffreAffaires: 3549.99,
-      },
-      {
-        id: 2,
-        nom: "Magasin B",
-        ventesTotal: 30,
-        produitsVendus: 97,
-        stocksFaibles: [],
-        chiffreAffaires: 2110.52,
-      },
-      {
-        id: 3,
-        nom: "Magasin C",
-        ventesTotal: 57,
-        produitsVendus: 134,
-        stocksFaibles: ["Poivre"],
-        chiffreAffaires: 4687.21,
-      },
-    ];
-    setTimeout(() => setStats(fakeStats), 350);
+    // Appel à l'API pour récupérer les statistiques des magasins
+    fetch("http://localhost:3800/maisonmere/stats")
+      .then((res) => res.json())
+      .then((data) => setStats(data))
+      .catch(() => setStats([]));
   }, []);
 
   return (
@@ -115,7 +92,7 @@ const Dashboard = () => {
                   <TableCell sx={{ fontWeight: 600 }}>{magasin.nom}</TableCell>
                   <TableCell align="right">{magasin.ventesTotal}</TableCell>
                   <TableCell align="right">{magasin.produitsVendus}</TableCell>
-          
+
                   <TableCell align="right">
                     <b style={{ color: "#127c50" }}>
                       ${magasin.chiffreAffaires.toFixed(2)}
