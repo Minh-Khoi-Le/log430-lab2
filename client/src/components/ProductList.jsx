@@ -10,7 +10,7 @@ const ProductList = ({
   <Box sx={{ width: "100%", px: 4, py: 2 }}>
     <Grid container spacing={4} justifyContent="flex-start">
       {produits.map((produit) => (
-        <Grid item key={produit.id} xs={12} sm={6} md={4} lg={3} xl={2}>
+        <Grid key={produit.id}>
           <ProductCard
             produit={produit}
             onDelete={onDelete}

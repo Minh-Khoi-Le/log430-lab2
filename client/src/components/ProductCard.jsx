@@ -59,7 +59,6 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
           justifyContent: "center",
         }}
       >
-        {/* Ajoute ici une image si tu en as une : <img src={produit.imgUrl} ... /> */}
       </Box>
 
       <CardContent sx={{ pb: 1 }}>
