@@ -1,75 +1,133 @@
 import React, { useEffect, useState } from "react";
+import {
+  Paper,
+  Typography,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Box,
+  Skeleton,
+} from "@mui/material";
+import StoreIcon from "@mui/icons-material/Store";
 
 const Dashboard = () => {
-  const [stats, setStats] = useState([]);
+  const [stats, setStats] = useState(null);
 
- useEffect(() => {
-  // Mock : simuler l’API
-  const fakeStats = [
-    {
-      id: 1,
-      nom: "Magasin A",
-      ventesTotal: 42,
-      produitsVendus: 120,
-      stocksFaibles: ["Baguette", "Lait"],
-      chiffreAffaires: 3549.99,
-    },
-    {
-      id: 2,
-      nom: "Magasin B",
-      ventesTotal: 30,
-      produitsVendus: 97,
-      stocksFaibles: [],
-      chiffreAffaires: 2110.52,
-    },
-    {
-      id: 3,
-      nom: "Magasin C",
-      ventesTotal: 57,
-      produitsVendus: 134,
-      stocksFaibles: ["Poivre"],
-      chiffreAffaires: 4687.21,
-    }
-  ];
-  setTimeout(() => setStats(fakeStats), 300); // Simule un délai réseau
-}, []);
-
+  useEffect(() => {
+    // Simule l’API (mock)
+    const fakeStats = [
+      {
+        id: 1,
+        nom: "Magasin A",
+        ventesTotal: 42,
+        produitsVendus: 120,
+        stocksFaibles: ["Baguette", "Lait"],
+        chiffreAffaires: 3549.99,
+      },
+      {
+        id: 2,
+        nom: "Magasin B",
+        ventesTotal: 30,
+        produitsVendus: 97,
+        stocksFaibles: [],
+        chiffreAffaires: 2110.52,
+      },
+      {
+        id: 3,
+        nom: "Magasin C",
+        ventesTotal: 57,
+        produitsVendus: 134,
+        stocksFaibles: ["Poivre"],
+        chiffreAffaires: 4687.21,
+      },
+    ];
+    setTimeout(() => setStats(fakeStats), 350);
+  }, []);
 
   return (
-    <div style={{ maxWidth: 1000, margin: "48px auto", background: "#fff", padding: 32, borderRadius: 8 }}>
-      <h2>Tableau de bord - Maison Mère</h2>
-      <table style={{ width: "100%", marginTop: 28 }}>
-        <thead>
-          <tr>
-            <th>Magasin</th>
-            <th>Ventes totales</th>
-            <th>Produits vendus</th>
-            <th>Stocks faibles</th>
-            <th>Chiffre d'affaires</th>
-          </tr>
-        </thead>
-        <tbody>
-          {stats.length === 0 && (
-            <tr>
-              <td colSpan={5}>Aucune donnée à afficher.</td>
-            </tr>
-          )}
-          {stats.map(magasin => (
-            <tr key={magasin.id}>
-              <td>{magasin.nom}</td>
-              <td>{magasin.ventesTotal}</td>
-              <td>{magasin.produitsVendus}</td>
-              <td>
-                {magasin.stocksFaibles?.length > 0
-                  ? magasin.stocksFaibles.join(", ")
-                  : "RAS"}
-              </td>
-              <td>${magasin.chiffreAffaires.toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Box sx={{ maxWidth: 1100, mx: "auto", mt: 6 }}>
+      <Paper elevation={3} sx={{ p: 5, borderRadius: 3 }}>
+        <Typography
+          variant="h4"
+          align="center"
+          sx={{
+            mb: 4,
+            fontWeight: 600,
+            letterSpacing: 1,
+            color: "#2d3240",
+          }}
+        >
+          <StoreIcon sx={{ mr: 1, fontSize: 38, color: "#3a8bff" }} />
+          Tableau de bord —{" "}
+          <span style={{ color: "#3a8bff" }}>Maison Mère</span>
+        </Typography>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ background: "#f7f8fa" }}>
+                <TableCell>
+                  <b>Magasin</b>
+                </TableCell>
+                <TableCell align="right">
+                  <b>Ventes totales</b>
+                </TableCell>
+                <TableCell align="right">
+                  <b>Produits vendus</b>
+                </TableCell>
+                <TableCell align="right">
+                  <b>Chiffre d'affaires</b>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {!stats &&
+                Array.from({ length: 3 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Skeleton width={100} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Skeleton width={80} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              {stats && stats.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    Aucune donnée à afficher.
+                  </TableCell>
+                </TableRow>
+              )}
+              {stats?.map((magasin) => (
+                <TableRow key={magasin.id}>
+                  <TableCell sx={{ fontWeight: 600 }}>{magasin.nom}</TableCell>
+                  <TableCell align="right">{magasin.ventesTotal}</TableCell>
+                  <TableCell align="right">{magasin.produitsVendus}</TableCell>
+          
+                  <TableCell align="right">
+                    <b style={{ color: "#127c50" }}>
+                      ${magasin.chiffreAffaires.toFixed(2)}
+                    </b>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </Box>
   );
 };
 
