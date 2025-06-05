@@ -1,7 +1,10 @@
 const express = require('express');
 const ProduitDAO = require('../dao/produit.dao');
+const MagasinDAO = require('../dao/magasin.dao');
 const router = express.Router();
 
+
+// CRUD PRODUITS
 // Récupérer tous les produits
 router.get('/produits', async (req, res) => {
   try {
@@ -55,4 +58,32 @@ router.delete('/produits/:id', async (req, res) => {
   }
 });
 
+
+// CRUD MAGASINS
+router.post('/magasins', async (req, res) => {
+  try {
+    const { nom, adresse } = req.body;
+    const magasin = await MagasinDAO.create({ nom, adresse });
+    res.status(201).json(magasin);
+  } catch (err) {
+    res.status(400).json({ error: "Erreur lors de la création du magasin", details: err.message });
+  }
+});
+router.put('/magasins/:id', async (req, res) => {
+  try {
+    const { nom, adresse } = req.body;
+    const magasin = await MagasinDAO.update(req.params.id, { nom, adresse });
+    res.json(magasin);
+  } catch (err) {
+    res.status(400).json({ error: "Erreur lors de la modification du magasin", details: err.message });
+  }
+});
+router.delete('/magasins/:id', async (req, res) => {
+  try {
+    await MagasinDAO.delete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(404).json({ error: "Magasin non trouvé", details: err.message });
+  }
+});
 module.exports = router;

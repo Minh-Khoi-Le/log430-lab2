@@ -1,0 +1,87 @@
+@startuml
+class MaisonMere {
+  +id
+  +nom
+  --
+  +creerProduit(p: Produit)
+  +mettreAJourProduit(p: Produit)
+  +supprimerProduit(p: Produit)
+  +genererRapportVentes()
+  +visualiserDashboard()
+  +accepterRestock(demande: Restock)
+  +refuserRestock(demande: Restock)
+}
+
+class Magasin {
+  +id
+  +nom
+  +adresse
+  --
+  +consulterStock()
+  +demanderRestock(p: Produit, qte: int)
+  +consulterEtatRestock(restock: Restock)
+}
+
+class Produit {
+  +id
+  +nom
+  +prix
+  +description
+}
+
+class Stock {
+  +quantite
+  --
+  +verifierDisponibilite(qte: int)
+}
+
+class Restock {
+  +id
+  +date
+  +statut  // ("en attente", "acceptée", "refusée")
+  +quantite
+  --
+  +consulterStatut()
+}
+
+class Client {
+  +id
+  +nom
+  +email
+  --
+  +acheter(produits: List<Produit>, magasin: Magasin)
+  +consulterAchats()
+}
+
+class Vente {
+  +id
+  +date
+  --
+  +calculerTotal()
+}
+
+class LigneVente {
+  +quantite
+  +prixUnitaire
+  --
+  +calculerSousTotal()
+}
+
+'--- Relations principales ---
+MaisonMere "1" o-- "*" Magasin : supervise
+MaisonMere "1" o-- "*" Produit : gere
+MaisonMere "1" o-- "*" Restock : traite
+
+Magasin "1" o-- "*" Stock : possède
+Stock "*" o-- "1" Produit : concerne
+
+Magasin "1" o-- "*" Restock : envoie
+Restock "*" o-- "1" Produit : concerne
+
+Client "1" o-- "*" Vente : effectue
+Magasin "1" o-- "*" Vente : effectue
+
+Vente "1" o-- "*" LigneVente : compose
+LigneVente "*" o-- "1" Produit : concerne
+
+@enduml
