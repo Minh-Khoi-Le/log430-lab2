@@ -1,0 +1,66 @@
+@startuml MDD
+title MDD — LOG430 Magasin
+
+entity "Produit" as Produit {
+  +id: int <<PK>>
+  nom: string
+  prix: float
+  description: string
+}
+
+entity "Magasin" as Magasin {
+  +id: int <<PK>>
+  nom: string
+  adresse: string
+}
+
+entity "Stock" as Stock {
+  +id: int <<PK>>
+  magasinId: int <<FK>>
+  produitId: int <<FK>>
+  quantite: int
+}
+
+entity "Client" as Client {
+  +id: int <<PK>>
+  nom: string <<UNIQUE>>
+}
+
+entity "Vente" as Vente {
+  +id: int <<PK>>
+  magasinId: int <<FK>>
+  clientId: int <<FK>>
+  date: datetime
+  total: float
+}
+
+entity "LigneVente" as LigneVente {
+  +id: int <<PK>>
+  venteId: int <<FK>>
+  produitId: int <<FK>>
+  quantite: int
+  prixUnitaire: float
+}
+
+entity "Restock" as Restock {
+  +id: int <<PK>>
+  produitId: int <<FK>>
+  magasinId: int <<FK>>
+  quantite: int
+  statut: string
+  createdAt: datetime
+}
+
+' Relations (associations / cardinalités)
+Magasin ||--o{ Stock : possède >
+Produit ||--o{ Stock : stocké dans >
+
+Magasin ||--o{ Vente : réalise >
+Client ||--o{ Vente : effectue >
+Vente ||--o{ LigneVente : comporte >
+Produit ||--o{ LigneVente : vendu dans >
+
+Produit ||--o{ Restock : concerne >
+Magasin ||--o{ Restock : demande >
+
+@enduml

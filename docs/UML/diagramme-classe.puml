@@ -1,4 +1,7 @@
-@startuml
+@startuml Diagramme de classes
+
+title Diagramme de classes
+
 class MaisonMere {
   +id
   +nom

@@ -1,0 +1,26 @@
+@startuml Diagramme de deploiement
+title Diagramme de deploiement — Architecture Docker Compose
+
+node "Client" {
+  artifact "Navigateur Web"
+  [React Vite App]
+}
+
+node "Docker Host" {
+  node "log430-client" {
+    [Nginx Static Server]
+  }
+  node "log430-server" {
+    [Node.js Express API]
+    [Prisma Client]
+  }
+  node "magasin-db" {
+    database "PostgreSQL" as DB
+  }
+}
+
+[React Vite App] -down-> [Nginx Static Server] : build
+[React Vite App] --> [Node.js Express API] : REST API (fetch)
+[Node.js Express API] --> [Prisma Client]
+[Prisma Client] --> DB
+@enduml

@@ -1,0 +1,28 @@
+@startuml RDCU Vente
+
+title RDCU - Vente produit
+
+actor Client
+participant "UI React" as Frontend
+participant "Express API" as Backend
+participant "VenteDAO"
+participant "Prisma (DB)"
+
+Client -> Frontend : Valider achat (Confirmer panier)
+Frontend -> Backend : POST /ventes {clientNom, magasinId, panier}
+Backend -> VenteDAO : createVente(...)
+VenteDAO -> Prisma : Vérifier stock (findFirst)
+Prisma --> VenteDAO : Stock OK/KO
+alt Stock suffisant
+  VenteDAO -> Prisma : Créer client (findFirst/create)
+  VenteDAO -> Prisma : Créer vente (vente.create)
+  VenteDAO -> Prisma : Créer lignes (lignes.create)
+  VenteDAO -> Prisma : Update stocks (updateMany)
+  Prisma --> VenteDAO : Success
+  VenteDAO --> Backend : {success}
+  Backend --> Frontend : 200 OK (Achat confirmé)
+else Stock insuffisant
+  VenteDAO --> Backend : {error: out of stock}
+  Backend --> Frontend : 400 (Erreur stock)
+end
+@enduml
