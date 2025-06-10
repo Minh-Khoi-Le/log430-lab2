@@ -42,8 +42,7 @@ model Stock {
 
 model Client {
   id      Int    @id @default(autoincrement())
-  nom     String
-  email   String @unique
+  nom     String @unique
   ventes  Vente[]
 }
 
@@ -75,7 +74,7 @@ model Restock {
   magasin      Magasin  @relation("DemandeMagasin", fields: [magasinId], references: [id])
   magasinId    Int
   quantite     Int
-  statut       String   // ex: "EN_ATTENTE", "ACCEPTE", "REFUSE"
+  statut       String   
   createdAt    DateTime @default(now())
 }
 

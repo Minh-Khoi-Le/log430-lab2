@@ -78,7 +78,7 @@ const Products = () => {
       background: "#f6f6f6",
       fontFamily: "sans-serif",
     }}>
-      {/* TOP HEADER, SEARCH, etc... */}
+      {/* TOP HEADER, SEARCH */}
       <div style={{
         margin: "40px 28px 0 28px",
         background: "#666",
@@ -94,7 +94,6 @@ const Products = () => {
           produits={produitsFiltres}
           onDelete={user.role === "gestionnaire" ? handleDelete : undefined}
           onEdit={user.role === "gestionnaire" ? handleEdit : undefined}
-          // Plus besoin de gérer le panier ici, CartContext le fait dans ProductCard
         />
 
         {/* Modals */}

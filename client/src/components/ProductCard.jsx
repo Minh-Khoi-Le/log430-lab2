@@ -46,21 +46,7 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
       onMouseLeave={() => setHover(false)}
       className="product-card"
     >
-      {/* TOP placeholder for product image */}
-      <Box
-        sx={{
-          width: "100%",
-          height: 56,
-          background: "#e3e6ee",
-          borderTopLeftRadius: 12,
-          borderTopRightRadius: 12,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-      </Box>
-
+      {/* ... (rest image placeholder, titres, etc) */}
       <CardContent sx={{ pb: 1 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -112,23 +98,27 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
         </Fade>
         {/* Client: bouton ajouter au panier */}
         {isClient && (
-          <Button
-            variant="contained"
-            startIcon={<AddShoppingCartIcon />}
-            onClick={() => addToCart(produit)}
-            sx={{
-              backgroundColor: "#208aff",
-              color: "#fff",
-              borderRadius: 2,
-              fontWeight: 700,
-              ml: "auto",
-              boxShadow: "none",
-              ":hover": { background: "#1566c4" },
-            }}
-            fullWidth
-          >
-            Ajouter au panier
-          </Button>
+          <Box sx={{ width: "100%" }}>
+            <Button
+              variant="contained"
+              startIcon={<AddShoppingCartIcon />}
+              onClick={() => addToCart(produit)}
+              disabled={totalStock === 0}
+              sx={{
+                backgroundColor: totalStock === 0 ? "#bdbdbd" : "#208aff",
+                color: "#fff",
+                borderRadius: 2,
+                fontWeight: 700,
+                ml: "auto",
+                boxShadow: "none",
+                ":hover": { background: "#1566c4" },
+                width: "100%"
+              }}
+              fullWidth
+            >
+              {totalStock === 0 ? "Out of stock" : "Ajouter au panier"}
+            </Button>
+          </Box>
         )}
       </CardActions>
     </Card>

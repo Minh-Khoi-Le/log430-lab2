@@ -26,7 +26,7 @@ function Login() {
       alert("Veuillez choisir un magasin !");
       return;
     }
-    // Pour gestionnaire, magasinId est facultatif (on peut le passer quand même pour future logique)
+    // Pour gestionnaire, magasinId est facultatif 
     setUser({
       role,
       nom: nom.trim(),

@@ -1,9 +1,49 @@
-import React from "react";
+import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
+import { useUser } from "../context/UserContext";
 
 const CartPage = () => {
   const { cart, removeFromCart, clearCart } = useCart();
+  const { user } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const total = cart.reduce((sum, item) => sum + item.produit.prix * item.quantite, 0);
+
+  // Confirmer l'achat : POST /ventes
+  const handleCheckout = async () => {
+    setErrorMsg("");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:3800/ventes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clientNom: user.nom,
+          magasinId: user.magasinId, 
+          panier: cart.map(item => ({
+            produitId: item.produit.id,
+            quantite: item.quantite,
+            prix: item.produit.prix
+          }))
+        })
+      });
+      const data = await res.json();
+      setLoading(false);
+
+      if (data.success) {
+        clearCart();
+        alert("Achat confirmé !");
+        setErrorMsg("");
+        window.location.reload(); 
+      } else if (data.error) {
+        setErrorMsg(data.error);
+      }
+    } catch (err) {
+      console.error("Erreur lors de la confirmation de l'achat :", err);
+      setErrorMsg("Erreur réseau ou serveur.");
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -86,6 +126,7 @@ const CartPage = () => {
                     e.currentTarget.style.border = "1.5px solid #c8c8e8";
                   }}
                   onClick={() => removeFromCart(item.produit.id)}
+                  disabled={loading}
                 >
                   Retirer
                 </button>
@@ -104,6 +145,9 @@ const CartPage = () => {
           >
             Total : <span style={{ color: "#376dff" }}>${total.toFixed(2)}</span>
           </div>
+          {errorMsg && (
+            <div style={{ color: "#f44336", fontWeight: 600, marginBottom: 14 }}>{errorMsg}</div>
+          )}
           <button
             style={{
               margin: "24px auto 0 auto",
@@ -118,27 +162,14 @@ const CartPage = () => {
               fontSize: 22,
               boxShadow: "0 4px 16px #63b3ed33",
               transition: "background 0.2s, transform 0.1s",
-              cursor: "pointer",
+              cursor: loading ? "not-allowed" : "pointer",
               letterSpacing: 0.2,
+              opacity: loading ? 0.7 : 1,
             }}
-            onMouseOver={e => {
-              e.currentTarget.style.background = "linear-gradient(90deg,#375bff,#3385d6)";
-            }}
-            onFocus={e => {
-              e.currentTarget.style.background = "linear-gradient(90deg,#375bff,#3385d6)";
-            }}
-            onMouseOut={e => {
-              e.currentTarget.style.background = "linear-gradient(90deg,#376dff,#63b3ed)";
-            }}
-            onBlur={e => {
-              e.currentTarget.style.background = "linear-gradient(90deg,#376dff,#63b3ed)";
-            }}
-            onClick={() => {
-              alert("Achat confirmé !");
-              clearCart();
-            }}
+            disabled={loading}
+            onClick={handleCheckout}
           >
-            Confirmer l'achat
+            {loading ? "Traitement..." : "Confirmer l'achat"}
           </button>
         </>
       )}

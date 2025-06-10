@@ -10,7 +10,6 @@ import { UserProvider, useUser } from "./context/UserContext";
 // Composant intermédiaire pour gérer la logique de connexion
 function MainApp() {
   const { user, setUser } = useUser();
-  // Tu peux garder le panier ici, ou dans un autre contexte (CartContext)
   const [panier, setPanier] = React.useState([]);
 
   if (!user) {

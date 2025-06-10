@@ -44,6 +44,8 @@ Pour injecter 10 produits automatiquement :
 
 ```bash
 docker-compose exec server npm run seed
+ou
+npm run seed
 ```
 
 ## Utilisation (fonctionnalités)
