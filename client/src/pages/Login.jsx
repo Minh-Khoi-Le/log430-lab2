@@ -1,9 +1,9 @@
 /**
  * Login Page
  * 
- * This component handles user authentication and role selection.
- * 
+ * This component handles user authentication.
  * After successful login, it updates the user context with the user information.
+ * The role is determined by the user's account information from the backend.
  */
 
 import React, { useState, useEffect } from "react";
@@ -11,10 +11,12 @@ import { useUser } from "../context/UserContext";
 
 function Login() {
   // State for form fields
-  const [role, setRole] = useState("client");
   const [nom, setNom] = useState("");
+  const [password, setPassword] = useState("");
   const [magasinId, setMagasinId] = useState("");
   const [magasins, setMagasins] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { setUser } = useUser();
 
   // Fetch the list of stores when component mounts
@@ -28,106 +30,239 @@ function Login() {
   /**
    * Handle form submission
    * 
-   * Validates form inputs and creates a user object with:
-   * - role: Selected role (client or gestionnaire)
-   * - nom: User's name
-   * - magasinId: Selected store ID (for clients only)
-   * - magasinNom: Selected store name (for clients only)
+   * Authenticates the user against the backend API and
+   * sets up the user context upon successful login
    * 
    * @param {Event} e - Form submit event
    */
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Validate name field
+    setError("");
+    setLoading(true);
+    
+    // Validate form fields
     if (!nom.trim()) {
-      alert("Veuillez entrer votre nom !");
+      setError("Veuillez entrer votre nom !");
+      setLoading(false);
       return;
     }
-    // Validate store selection for clients
-    if (role === "client" && !magasinId) {
-      alert("Veuillez choisir un magasin !");
-      return;
-    }
-    // Create user object and update context
-    setUser({
-      role,
-      nom: nom.trim(),
-      magasinId: role === "client" ? parseInt(magasinId) : null,
-      magasinNom:
-        role === "client"
-          ? magasins.find((m) => m.id === parseInt(magasinId))?.nom || ""
-          : "",
-    });
+    
+    // Send login request to API
+    fetch("http://localhost:3000/api/v1/users/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nom: nom.trim(),
+        password: password.trim() || "password",
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Login failed");
+        }
+        return res.json();
+      })
+      .then((userData) => {
+        // For client role, ensure a store is selected
+        if (userData.role === "client" && !magasinId) {
+          setError("En tant que client, veuillez choisir un magasin !");
+          setLoading(false);
+          return;
+        }
+        
+        // Create user object and update context
+        setUser({
+          id: userData.id,
+          role: userData.role,
+          nom: userData.nom,
+          magasinId: userData.role === "client" ? parseInt(magasinId) : null,
+          magasinNom:
+            userData.role === "client"
+              ? magasins.find((m) => m.id === parseInt(magasinId))?.nom || ""
+              : "",
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Authentication failed. Please check your credentials.");
+        setLoading(false);
+      });
   };
 
   return (
-    <div style={{ marginTop: 100, textAlign: "center" }}>
-      <h2>Bienvenue!</h2>
-      <form onSubmit={handleSubmit} style={{ maxWidth: 400, margin: "auto" }}>
-        {/* Role selection dropdown */}
-        <label>
-          Je suis&nbsp;:
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            style={{ marginLeft: 8 }}
-          >
-            <option value="client">Client</option>
-            <option value="gestionnaire">Gestionnaire</option>
-          </select>
-        </label>
-        <br />
-        <br />
-        {/* Name input field */}
-        <label>
-          Mon nom&nbsp;:
-          <input
-            type="text"
-            value={nom}
-            onChange={(e) => setNom(e.target.value)}
-            placeholder="Entrez votre nom"
-            style={{ marginLeft: 8 }}
-          />
-        </label>
-        <br />
-        <br />
-        {/* Store selection dropdown (only shown for clients) */}
-        {role === "client" && (
-          <label>
-            Mon magasin&nbsp;:
+    <div style={{ 
+      display: "flex", 
+      flexDirection: "column", 
+      alignItems: "center", 
+      justifyContent: "center", 
+      minHeight: "100vh",
+      padding: "1rem",
+      backgroundColor: "#f9f9f9"
+    }}>
+      <div style={{
+        width: "100%",
+        maxWidth: "400px",
+        padding: "2rem",
+        backgroundColor: "white",
+        borderRadius: "8px",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
+      }}>
+        <h2 style={{ textAlign: "center", marginBottom: "1.5rem" }}>Connexion</h2>
+        
+        <form onSubmit={handleSubmit}>
+          {/* Username field */}
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem" }}>
+              Nom d'utilisateur:
+            </label>
+            <input
+              type="text"
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+              placeholder="Entrez votre nom d'utilisateur"
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                border: "1px solid #ddd",
+                borderRadius: "4px"
+              }}
+            />
+          </div>
+          
+          {/* Password field */}
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem" }}>
+              Mot de passe:
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Entrez votre mot de passe"
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                border: "1px solid #ddd",
+                borderRadius: "4px"
+              }}
+            />
+          </div>
+          
+          {/* Store selection field */}
+          <div style={{ marginBottom: "1rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem" }}>
+              Magasin (pour les clients):
+            </label>
             <select
               value={magasinId}
               onChange={(e) => setMagasinId(e.target.value)}
-              style={{ marginLeft: 8 }}
-              required
+              style={{
+                width: "100%",
+                padding: "0.5rem",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                backgroundColor: "white"
+              }}
             >
-              <option value="">-- Choisir un magasin --</option>
+              <option value="">-- Sélectionnez un magasin --</option>
               {magasins.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.nom}
                 </option>
               ))}
             </select>
-          </label>
-        )}
-        <br />
-        <br />
-        {/* Submit button */}
-        <button
-          type="submit"
-          style={{
-            padding: "8px 24px",
-            background: "#3a8bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: 5,
-            fontWeight: 600,
-            fontSize: 18,
-          }}
-        >
-          Continuer
-        </button>
-      </form>
+            <p style={{ 
+              margin: "0.25rem 0 0 0", 
+              fontSize: "0.8rem", 
+              color: "#666" 
+            }}>
+              * Si vous êtes gestionnaire, vous pouvez ignorer cette sélection
+            </p>
+          </div>
+          
+          {/* Error message */}
+          {error && (
+            <div style={{ 
+              padding: "0.5rem",
+              backgroundColor: "#ffe6e6",
+              color: "#cc0000",
+              borderRadius: "4px",
+              marginBottom: "1rem",
+              fontSize: "0.9rem"
+            }}>
+              {error}
+            </div>
+          )}
+          
+          {/* Submit button */}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              backgroundColor: "#4568dc",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.7 : 1
+            }}
+          >
+            {loading ? "Connexion..." : "Se connecter"}
+          </button>
+        </form>
+      </div>
+      
+      {/* Test credentials information box */}
+      <div style={{ 
+        width: "100%",
+        maxWidth: "400px",
+        marginTop: "2rem",
+        padding: "1rem",
+        backgroundColor: "#f0f4ff",
+        border: "1px solid #d0d8ff",
+        borderRadius: "6px"
+      }}>
+        <h3 style={{ margin: "0 0 0.5rem 0", fontSize: "1rem", textAlign: "center" }}>
+          Comptes de test
+        </h3>
+        
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div style={{ width: "48%" }}>
+            <p style={{ fontWeight: "bold", margin: "0.5rem 0", fontSize: "0.9rem" }}>
+              Client:
+            </p>
+            <ul style={{ margin: "0", paddingLeft: "1.5rem", fontSize: "0.9rem" }}>
+              <li>Nom: <strong>Client</strong></li>
+              <li>Mot de passe: <strong>password</strong></li>
+              <li>Choisir un magasin</li>
+            </ul>
+          </div>
+          
+          <div style={{ width: "48%" }}>
+            <p style={{ fontWeight: "bold", margin: "0.5rem 0", fontSize: "0.9rem" }}>
+              Gestionnaire:
+            </p>
+            <ul style={{ margin: "0", paddingLeft: "1.5rem", fontSize: "0.9rem" }}>
+              <li>Nom: <strong>Gestionnaire</strong></li>
+              <li>Mot de passe: <strong>password</strong></li>
+            </ul>
+          </div>
+        </div>
+        
+        <p style={{ 
+          margin: "0.5rem 0 0 0", 
+          fontSize: "0.8rem", 
+          color: "#666", 
+          fontStyle: "italic",
+          textAlign: "center" 
+        }}>
+          Autres comptes: Alice, Bob (clients)
+        </p>
+      </div>
     </div>
   );
 }

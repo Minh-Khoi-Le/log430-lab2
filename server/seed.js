@@ -22,11 +22,12 @@ const magasins = [
   { nom: "Magasin E", adresse: "5 chemin de Nice" },
 ];
 
-// Quelques clients fictifs
-const clients = [
-  { nom: "Alice" },
-  { nom: "Bob" },
-  { nom: "Chloé" }
+// Users with different roles
+const users = [
+  { nom: "Gestionnaire", role: "gestionnaire", password: "password" },
+  { nom: "Client", role: "client", password: "password" },
+  { nom: "Alice", role: "client", password: "password" },
+  { nom: "Bob", role: "client", password: "password" },
 ];
 
 function getRandomInt(min, max) {
@@ -38,19 +39,20 @@ async function main() {
   await prisma.ligneVente?.deleteMany?.();
   await prisma.vente?.deleteMany?.();
   await prisma.stock?.deleteMany?.();
+  await prisma.restock?.deleteMany?.();
   await prisma.magasin.deleteMany({});
   await prisma.produit.deleteMany({});
-  await prisma.client?.deleteMany?.();
+  await prisma.user?.deleteMany?.();
 
-  // Insérer produits, magasins et clients
+  // Insérer produits, magasins et users
   await prisma.produit.createMany({ data: produits });
   await prisma.magasin.createMany({ data: magasins });
-  await prisma.client.createMany({ data: clients });
+  await prisma.user.createMany({ data: users });
 
-  // On récupère les produits, magasins et clients insérés
+  // On récupère les produits, magasins et users insérés
   const produitsList = await prisma.produit.findMany();
   const magasinsList = await prisma.magasin.findMany();
-  const clientsList = await prisma.client.findMany();
+  const clientsList = await prisma.user.findMany({ where: { role: 'client' } });
 
   // Création des stocks pour chaque produit X magasin
   for (const magasin of magasinsList) {
@@ -69,7 +71,7 @@ async function main() {
   for (const magasin of magasinsList) {
     const nbVentes = getRandomInt(5, 10); // 5 à 10 ventes par magasin
     for (let v = 0; v < nbVentes; v++) {
-      // Client au hasard
+      // Client au hasard parmi les utilisateurs de rôle 'client'
       const client = clientsList[getRandomInt(0, clientsList.length - 1)];
       // 1 à 4 produits différents par vente
       const produitsChoisis = [...produitsList]
@@ -90,7 +92,7 @@ async function main() {
       await prisma.vente.create({
         data: {
           magasinId: magasin.id,
-          clientId: client.id,
+          userId: client.id,
           total,
           lignes: {
             create: lignes
@@ -100,7 +102,7 @@ async function main() {
     }
   }
 
-  console.log("Données seedées (produits, magasins, stocks, clients, ventes) !");
+  console.log("Données seedées (produits, magasins, stocks, users, ventes) !");
 }
 
 main()

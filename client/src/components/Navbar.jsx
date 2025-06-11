@@ -6,7 +6,7 @@
  * 
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
@@ -23,15 +23,17 @@ import {
   ListItemIcon,
   Tooltip,
   Avatar,
+  Chip,
 } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
-import SwitchAccountIcon from "@mui/icons-material/SwitchAccount";
+import StoreIcon from "@mui/icons-material/Store";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 function Navbar() {
   const { cart } = useCart();
   const { user, setUser } = useUser();
+  const [magasins, setMagasins] = useState([]);
   // Calculate total items in cart for badge display
   const totalItems = cart.reduce((acc, item) => acc + item.quantite, 0);
   const location = useLocation();
@@ -39,6 +41,16 @@ function Navbar() {
   // User menu state management
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = Boolean(anchorEl);
+
+  // Fetch available stores when component mounts
+  useEffect(() => {
+    if (user?.role === "client") {
+      fetch("http://localhost:3000/api/v1/stores")
+        .then((res) => res.json())
+        .then((data) => setMagasins(data))
+        .catch(() => setMagasins([]));
+    }
+  }, [user]);
 
   /**
    * Menu handlers
@@ -48,9 +60,13 @@ function Navbar() {
   // Close user menu
   const handleClose = () => setAnchorEl(null);
 
-  // Switch between client and gestionnaire roles
-  const handleRoleChange = (role) => {
-    setUser((u) => ({ ...u, role }));
+  // Handle store change
+  const handleStoreChange = (magasinId, magasinNom) => {
+    setUser((u) => ({ 
+      ...u, 
+      magasinId: parseInt(magasinId),
+      magasinNom
+    }));
     handleClose();
   };
   
@@ -124,6 +140,21 @@ function Navbar() {
             </Typography>
           )}
           
+          {/* Display current store for client */}
+          {user?.role === "client" && user?.magasinNom && (
+            <Chip
+              icon={<StoreIcon />}
+              label={user.magasinNom}
+              variant="outlined"
+              sx={{ 
+                color: 'white', 
+                borderColor: 'rgba(255,255,255,0.3)',
+                marginRight: 2,
+                "& .MuiChip-icon": { color: 'white' }
+              }}
+            />
+          )}
+          
           {/* User account menu button */}
           <Tooltip title="Mon compte">
             <IconButton
@@ -156,26 +187,31 @@ function Navbar() {
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
-            {/* Role selection options */}
-            <MenuItem
-              selected={user?.role === "client"}
-              onClick={() => handleRoleChange("client")}
-            >
-              <ListItemIcon>
-                <SwitchAccountIcon fontSize="small" />
-              </ListItemIcon>
-              Client
-            </MenuItem>
-            <MenuItem
-              selected={user?.role === "gestionnaire"}
-              onClick={() => handleRoleChange("gestionnaire")}
-            >
-              <ListItemIcon>
-                <SwitchAccountIcon fontSize="small" />
-              </ListItemIcon>
-              Gestionnaire
-            </MenuItem>
-            <Divider />
+            {/* Only show store selection for clients */}
+            {user?.role === "client" && (
+              <>
+                <MenuItem disabled sx={{ opacity: 0.7 }}>
+                  <ListItemIcon>
+                    <StoreIcon fontSize="small" />
+                  </ListItemIcon>
+                  Changer de magasin
+                </MenuItem>
+                <Divider />
+                {/* List of available stores */}
+                {magasins.map((magasin) => (
+                  <MenuItem
+                    key={magasin.id}
+                    selected={user.magasinId === magasin.id}
+                    onClick={() => handleStoreChange(magasin.id, magasin.nom)}
+                    sx={{ pl: 3 }}
+                  >
+                    {magasin.nom}
+                  </MenuItem>
+                ))}
+                <Divider />
+              </>
+            )}
+            
             {/* Logout option */}
             <MenuItem onClick={handleLogout}>
               <ListItemIcon>

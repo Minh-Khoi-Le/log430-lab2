@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Multi-Stores API
   version: 1.0.0
-  description: API for managing multi-store operations, including products, stores, sales, clients, and parent company management
+  description: API for managing multi-store operations, including products, stores, sales, users, and parent company management
 servers:
   - url: http://localhost:3000/api/v1
     description: Development server
@@ -43,19 +43,23 @@ components:
         adresse:
           type: string
           example: "123 Main Street"
-    Client:
+    User:
       type: object
-      required: [id, nom]
+      required: [id, nom, role]
       properties:
         id:
           type: integer
           example: 1
         nom:
           type: string
-          example: "Client Name"
+          example: "User Name"
+        role:
+          type: string
+          enum: [client, gestionnaire]
+          example: "client"
     Sale:
       type: object
-      required: [magasinId, clientId]
+      required: [magasinId, userId]
       properties:
         id:
           type: integer
@@ -63,7 +67,7 @@ components:
         magasinId:
           type: integer
           example: 1
-        clientId:
+        userId:
           type: integer
           example: 1
         date:
@@ -311,11 +315,11 @@ paths:
         '201':
           description: Created
   
-  /sales/client/{clientId}:
+  /sales/user/{userId}:
     get:
-      summary: Get sales for a specific client
+      summary: Get sales for a specific user
       parameters:
-        - name: clientId
+        - name: userId
           in: path
           required: true
           schema:
@@ -324,22 +328,64 @@ paths:
         '200':
           description: OK
   
-  # Client routes
-  /clients:
+  # User routes
+  /users:
     get:
-      summary: List all clients
+      summary: List all users
       responses:
         '200':
           description: OK
     post:
-      summary: Create a new client
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nom:
+                  type: string
+                role:
+                  type: string
+                  enum: [client, gestionnaire]
+                password:
+                  type: string
       responses:
         '201':
           description: Created
   
-  /clients/{id}:
+  /users/login:
+    post:
+      summary: Authenticate a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nom:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /users/{id}:
     get:
-      summary: Get client details by ID
+      summary: Get user details by ID
       parameters:
         - name: id
           in: path
@@ -350,9 +396,9 @@ paths:
         '200':
           description: OK
   
-  /clients/{id}/ventes:
+  /users/{id}/ventes:
     get:
-      summary: Get sales history for a client
+      summary: Get sales history for a user
       parameters:
         - name: id
           in: path

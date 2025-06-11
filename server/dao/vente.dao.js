@@ -10,17 +10,17 @@ const VenteDAO = {
    * 
    * @param {Object} saleData - Sale transaction data
    * @param {number|string} saleData.magasinId - Store ID where the sale occurred
-   * @param {number|string} saleData.clientId - Client ID who made the purchase
+   * @param {number|string} saleData.userId - User ID (client) who made the purchase
    * @param {Array} saleData.lignes - Array of sale line items
    * @param {number} saleData.total - Total amount of the sale
    * @returns {Promise<Object>} - Promise resolving to created sale with line items
    */
-  create: async ({ magasinId, clientId, lignes, total }) => {
+  create: async ({ magasinId, userId, lignes, total }) => {
     // Create the sale and associated line items in a single transaction
     return prisma.vente.create({
       data: {
         magasinId: parseInt(magasinId),
-        clientId: parseInt(clientId),
+        userId: parseInt(userId),
         total: parseFloat(total),
         lignes: {
           create: lignes.map(ligne => ({
@@ -35,29 +35,29 @@ const VenteDAO = {
   },
   
   /**
-   * Get Sales by Client
+   * Get Sales by User
    * 
-   * Retrieves all sales for a specific client with detailed information.
+   * Retrieves all sales for a specific user (client) with detailed information.
    * Includes line items with product details and store information.
    * 
-   * @param {number|string} clientId - Client ID
-   * @returns {Promise<Array>} - Promise resolving to array of client's sales
+   * @param {number|string} userId - User ID
+   * @returns {Promise<Array>} - Promise resolving to array of user's sales
    */
-  getByClient: async (clientId) =>
+  getByUser: async (userId) =>
     prisma.vente.findMany({
-      where: { clientId: parseInt(clientId) },
+      where: { userId: parseInt(userId) },
       include: { lignes: { include: { produit: true } }, magasin: true }
     }),
   
   /**
    * Get All Sales
    * 
-   * Retrieves all sales with client and store information.
+   * Retrieves all sales with user and store information.
    * Used for sales reporting and analysis.
    * 
    * @returns {Promise<Array>} - Promise resolving to array of all sales
    */
-  getAll: async () => prisma.vente.findMany({ include: { client: true, magasin: true } }),
+  getAll: async () => prisma.vente.findMany({ include: { user: true, magasin: true } }),
 };
 
 export default VenteDAO;

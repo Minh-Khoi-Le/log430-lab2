@@ -76,40 +76,43 @@ model Stock {
 }
 
 /**
- * Client Model
+ * User Model
  * 
- * Represents a customer who makes purchases.
- * Clients are identified by name and can have multiple sales transactions.
+ * Represents a user who can either be a client or gestionnaire (manager).
+ * Users are identified by name and can have multiple sales transactions if they are clients.
  * 
  * Relationships:
- * - One-to-Many with Vente: A client can make multiple purchases
+ * - One-to-Many with Vente: A user (client) can make multiple purchases
  * 
  * Constraints:
- * - Unique name ensures no duplicate client records
+ * - Unique name ensures no duplicate user records
+ * - Role field indicates whether the user is a 'client' or 'gestionnaire'
  */
-model Client {
+model User {
   id      Int    @id @default(autoincrement())
   nom     String @unique
+  role    String // 'client' or 'gestionnaire'
+  password String @default("password") // Simple authentication
   ventes  Vente[]
 }
 
 /**
  * Vente (Sale) Model
  * 
- * Represents a sales transaction made by a client at a specific store.
+ * Represents a sales transaction made by a user at a specific store.
  * Each sale consists of multiple line items and has a total amount.
  * 
  * Relationships:
  * - Many-to-One with Magasin: Each sale occurs at one store
- * - Many-to-One with Client: Each sale is made by one client
+ * - Many-to-One with User: Each sale is made by one user (client)
  * - One-to-Many with LigneVente: A sale consists of multiple line items
  */
 model Vente {
   id         Int         @id @default(autoincrement())
   magasin    Magasin     @relation(fields: [magasinId], references: [id])
   magasinId  Int
-  client     Client      @relation(fields: [clientId], references: [id])
-  clientId   Int
+  user       User        @relation(fields: [userId], references: [id])
+  userId     Int
   date       DateTime    @default(now())
   lignes     LigneVente[]
   total      Float
