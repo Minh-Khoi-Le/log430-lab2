@@ -76,6 +76,53 @@ function Navbar() {
     handleClose();
   };
 
+  // Generate menu items based on user role
+  const generateMenuItems = () => {
+    const menuItems = [];
+    
+    // Add store selection items for client role
+    if (user?.role === "client") {
+      menuItems.push(
+        <MenuItem key="store-header" disabled sx={{ opacity: 0.7 }}>
+          <ListItemIcon>
+            <StoreIcon fontSize="small" />
+          </ListItemIcon>
+          Changer de magasin
+        </MenuItem>
+      );
+      
+      menuItems.push(<Divider key="divider-1" />);
+      
+      // Add store options
+      magasins.forEach(magasin => {
+        menuItems.push(
+          <MenuItem
+            key={`store-${magasin.id}`}
+            selected={user.magasinId === magasin.id}
+            onClick={() => handleStoreChange(magasin.id, magasin.nom)}
+            sx={{ pl: 3 }}
+          >
+            {magasin.nom}
+          </MenuItem>
+        );
+      });
+      
+      menuItems.push(<Divider key="divider-2" />);
+    }
+    
+    // Add logout option (for all users)
+    menuItems.push(
+      <MenuItem key="logout" onClick={handleLogout}>
+        <ListItemIcon>
+          <LogoutIcon fontSize="small" />
+        </ListItemIcon>
+        Déconnexion
+      </MenuItem>
+    );
+    
+    return menuItems;
+  };
+
   return (
     <AppBar position="static" sx={{ background: "#2d3240", boxShadow: 2 }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between", minHeight: 60 }}>
@@ -187,38 +234,7 @@ function Navbar() {
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
-            {/* Only show store selection for clients */}
-            {user?.role === "client" && (
-              <>
-                <MenuItem disabled sx={{ opacity: 0.7 }}>
-                  <ListItemIcon>
-                    <StoreIcon fontSize="small" />
-                  </ListItemIcon>
-                  Changer de magasin
-                </MenuItem>
-                <Divider />
-                {/* List of available stores */}
-                {magasins.map((magasin) => (
-                  <MenuItem
-                    key={magasin.id}
-                    selected={user.magasinId === magasin.id}
-                    onClick={() => handleStoreChange(magasin.id, magasin.nom)}
-                    sx={{ pl: 3 }}
-                  >
-                    {magasin.nom}
-                  </MenuItem>
-                ))}
-                <Divider />
-              </>
-            )}
-            
-            {/* Logout option */}
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <LogoutIcon fontSize="small" />
-              </ListItemIcon>
-              Déconnexion
-            </MenuItem>
+            {generateMenuItems()}
           </Menu>
         </Box>
       </Toolbar>

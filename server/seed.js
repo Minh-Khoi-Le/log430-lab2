@@ -24,8 +24,8 @@ const magasins = [
 
 // Users with different roles
 const users = [
-  { nom: "Gestionnaire", role: "gestionnaire", password: "password" },
-  { nom: "Client", role: "client", password: "password" },
+  { nom: "G", role: "gestionnaire", password: "p" },
+  { nom: "C", role: "client", password: "p" },
   { nom: "Alice", role: "client", password: "password" },
   { nom: "Bob", role: "client", password: "password" },
 ];

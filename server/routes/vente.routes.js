@@ -66,4 +66,22 @@ router.post('/', controller.create);
  */
 router.get('/client/:clientId', controller.byClient);
 
+/**
+ * GET /api/v1/sales/store/:storeId
+ * 
+ * Get sales for a specific store
+ * 
+ * Path parameters:
+ * - storeId: Store ID
+ * 
+ * Query parameters:
+ * - limit: Optional limit on number of sales to return
+ * 
+ * Used by:
+ * - Store detail pages
+ * - Store management interfaces
+ * - Sales analysis for a specific store
+ */
+router.get('/store/:storeId', controller.byStore);
+
 export default router;

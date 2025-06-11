@@ -11,6 +11,14 @@ import ProductList from "../components/ProductList";
 import Modal from "../components/Modal";
 import ProductEditForm from "../components/ProductEditForm";
 import { useUser } from "../context/UserContext";
+import { 
+  Box, 
+  FormControlLabel, 
+  Switch, 
+  Typography, 
+  Paper,
+  Divider 
+} from "@mui/material";
 
 const Products = () => {
   // State management for products and UI
@@ -19,6 +27,7 @@ const Products = () => {
   const [produitASupprimer, setProduitASupprimer] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [produitAModifier, setProduitAModifier] = useState(null);
+  const [hideUnavailable, setHideUnavailable] = useState(false);
 
   const { user } = useUser();
 
@@ -96,15 +105,42 @@ const Products = () => {
     setProduitAModifier(null);
   };
 
+  // Handle availability filter change
+  const handleFilterChange = (event) => {
+    setHideUnavailable(event.target.checked);
+  };
+
   return (
     <div style={{
       minHeight: "100vh",
       background: "#f6f6f6",
       fontFamily: "sans-serif",
     }}>
+      {/* Header with title and filters */}
+      {user?.role === "client" && (
+        <Paper elevation={1} sx={{ mx: 4, mt: 4, p: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">
+              Catalogue de produits
+            </Typography>
+            <FormControlLabel
+              control={
+                <Switch 
+                  checked={hideUnavailable}
+                  onChange={handleFilterChange}
+                  color="primary"
+                />
+              }
+              label="Afficher uniquement les produits disponibles"
+              labelPlacement="start"
+            />
+          </Box>
+        </Paper>
+      )}
+
       {/* Main content area with product listing */}
       <div style={{
-        margin: "40px 28px 0 28px",
+        margin: user?.role === "client" ? "20px 28px 0 28px" : "40px 28px 0 28px",
         background: "#666",
         borderRadius: 4,
         padding: "40px 12px 60px 12px",
@@ -119,6 +155,7 @@ const Products = () => {
           produits={produits}
           onDelete={user.role === "gestionnaire" ? handleDelete : undefined}
           onEdit={user.role === "gestionnaire" ? handleEdit : undefined}
+          hideUnavailable={hideUnavailable}
         />
 
         {/* Modal for product editing */}

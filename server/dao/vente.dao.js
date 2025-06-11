@@ -50,6 +50,35 @@ const VenteDAO = {
     }),
   
   /**
+   * Get Sales by Store
+   * 
+   * Retrieves all sales for a specific store with detailed information.
+   * Includes line items with product details and user information.
+   * Optionally limits the number of results returned (e.g., for recent sales).
+   * Results are ordered by date, with most recent sales first.
+   * 
+   * @param {number|string} storeId - Store ID
+   * @param {number} [limit] - Optional limit on number of sales to return
+   * @returns {Promise<Array>} - Promise resolving to array of store's sales
+   */
+  getByStore: async (storeId, limit) => {
+    const query = {
+      where: { magasinId: parseInt(storeId) },
+      include: { 
+        lignes: { include: { produit: true } }, 
+        user: true 
+      },
+      orderBy: { date: 'desc' }
+    };
+    
+    if (limit) {
+      query.take = limit;
+    }
+    
+    return prisma.vente.findMany(query);
+  },
+  
+  /**
    * Get All Sales
    * 
    * Retrieves all sales with user and store information.

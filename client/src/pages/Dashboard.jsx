@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Paper,
   Typography,
@@ -18,13 +19,17 @@ import {
   TableBody,
   Box,
   Skeleton,
+  Button,
+  Tooltip,
 } from "@mui/material";
 import StoreIcon from "@mui/icons-material/Store";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from "recharts";
 
 const Dashboard = () => {
   // State to store statistics data from API
   const [stats, setStats] = useState(null);
+  const navigate = useNavigate();
 
   // Fetch store statistics when component mounts
   useEffect(() => {
@@ -35,8 +40,13 @@ const Dashboard = () => {
       .catch(() => setStats([]));
   }, []);
 
+  // Navigate to store detail page
+  const handleStoreSelect = (storeId) => {
+    navigate(`/store/${storeId}`);
+  };
+
   return (
-    <Box sx={{ maxWidth: 1100, mx: "auto", mt: 6 }}>
+    <Box sx={{ maxWidth: 1100, mx: "auto", mt: 6, px: 2 }}>
       {/* Main statistics table card */}
       <Paper elevation={3} sx={{ p: 5, borderRadius: 3 }}>
         {/* Dashboard header */}
@@ -73,6 +83,9 @@ const Dashboard = () => {
                 <TableCell align="right">
                   <b>Chiffre d'affaires</b>
                 </TableCell>
+                <TableCell align="center">
+                  <b>Actions</b>
+                </TableCell>
               </TableRow>
             </TableHead>
             
@@ -91,10 +104,10 @@ const Dashboard = () => {
                     <TableCell align="right">
                       <Skeleton />
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="right">
                       <Skeleton width={100} />
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="center">
                       <Skeleton width={80} />
                     </TableCell>
                   </TableRow>
@@ -119,6 +132,18 @@ const Dashboard = () => {
                     <b style={{ color: "#127c50" }}>
                       ${magasin.chiffreAffaires.toFixed(2)}
                     </b>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title="Voir les détails">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<VisibilityIcon />}
+                        onClick={() => handleStoreSelect(magasin.id)}
+                      >
+                        Détails
+                      </Button>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
@@ -153,7 +178,7 @@ const Dashboard = () => {
                 ))}
               </Pie>
               {/* Interactive tooltips and legend */}
-              <Tooltip formatter={(value) => `${value} ventes`} />
+              <RechartsTooltip formatter={(value) => `${value} ventes`} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>

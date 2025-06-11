@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
  * 
  * Creates a new sale transaction with the provided data.
  * This is a complex operation that handles:
- * 1. Client identification or creation
+ * 1. User identification or creation
  * 2. Input format normalization
  * 3. Stock availability verification
  * 4. Transaction creation
@@ -19,15 +19,15 @@ const prisma = new PrismaClient();
  */
 export async function create(req, res, next) {
   try {
-    let { magasinId, clientId, lignes, clientNom, panier } = req.body;
+    let { magasinId, userId, lignes, clientNom, panier } = req.body;
 
-    // If clientId is not provided, use clientNom to find or create the client
-    if (!clientId && clientNom) {
-      let client = await prisma.client.findFirst({ where: { nom: clientNom } });
-      if (!client) {
-        client = await prisma.client.create({ data: { nom: clientNom } });
+    // If userId is not provided, use clientNom to find the user
+    if (!userId && clientNom) {
+      let user = await prisma.user.findFirst({ where: { nom: clientNom } });
+      if (!user) {
+        return res.status(400).json({ error: "Utilisateur non trouvé" });
       }
-      clientId = client.id;
+      userId = user.id;
     }
 
     // If lignes is not provided, convert panier to lignes
@@ -39,7 +39,7 @@ export async function create(req, res, next) {
       }));
     }
 
-    if (!magasinId || !clientId || !lignes) {
+    if (!magasinId || !userId || !lignes) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -77,7 +77,7 @@ export async function create(req, res, next) {
       const vente = await tx.vente.create({
         data: {
           magasinId: parseInt(magasinId),
-          clientId: parseInt(clientId),
+          userId: parseInt(userId),
           total: parseFloat(total),
           lignes: {
             create: lignes.map(ligne => ({
@@ -141,7 +141,26 @@ export async function list(req, res, next) {
  */
 export async function byClient(req, res, next) {
   try {
-    const ventes = await VenteDAO.getByClient(req.params.clientId);
+    const ventes = await VenteDAO.getByUser(req.params.clientId);
+    res.json(ventes);
+  } catch (err) { next(err); }
+}
+
+/**
+ * Get Store Sales Controller
+ * 
+ * Retrieves all sales for a specific store with detailed information,
+ * including product details, client information, and line items.
+ * Optionally limits the results to a specific count.
+ * 
+ * @param {Request} req - Express request object with store ID parameter
+ * @param {Response} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export async function byStore(req, res, next) {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+    const ventes = await VenteDAO.getByStore(req.params.storeId, limit);
     res.json(ventes);
   } catch (err) { next(err); }
 } 
