@@ -64,7 +64,7 @@ export async function ventesConsolidees(req, res, next) {
     }
     const ventes = await prisma.vente.findMany({
       where,
-      include: { magasin: true, client: true, lignes: true },
+      include: { magasin: true, user: true, lignes: true },
     });
     res.json(ventes);
   } catch (e) { next(e); }

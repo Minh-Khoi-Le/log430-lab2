@@ -6,7 +6,7 @@
  * These routes are used by:
  * - Store management interfaces to view and manage product inventory
  * - Parent company (maisonmere) to manage the product catalog
- * - Sales interfaces to retrieve product information for sales transactions (incoming)
+ * - Sales interfaces to retrieve product information for sales transactions
  */
 
 import express from 'express';
