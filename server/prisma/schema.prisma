@@ -10,7 +10,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
+/**
+ * Magasin (Store) Model
+ * 
+ * Represents a physical store location in the retail network.
+ * Each store has inventory stock, processes sales, and can request restocks.
+ * 
+ * Relationships:
+ * - One-to-Many with Stock: A store has multiple product stock records
+ * - One-to-Many with Vente: A store processes multiple sales
+ * - One-to-Many with Restock: A store can make multiple restock requests
+ */
 model Magasin {
   id        Int      @id @default(autoincrement())
   nom       String
@@ -20,6 +30,17 @@ model Magasin {
   demandesRestock Restock[] @relation("DemandeMagasin")
 }
 
+/**
+ * Produit (Product) Model
+ * 
+ * Represents a product in the retail catalog.
+ * Products are stocked in stores, sold through sales, and can be restocked.
+ * 
+ * Relationships:
+ * - One-to-Many with Stock: A product can be stocked in multiple stores
+ * - One-to-Many with LigneVente: A product can appear in multiple sale line items
+ * - One-to-Many with Restock: A product can be requested in multiple restock requests
+ */
 model Produit {
   id        Int      @id @default(autoincrement())
   nom       String
@@ -30,6 +51,20 @@ model Produit {
   restocks  Restock[]
 }
 
+/**
+ * Stock Model
+ * 
+ * Represents the inventory level of a specific product in a specific store.
+ * This is a join table with additional data (quantity) between Magasin and Produit.
+ * 
+ * Relationships:
+ * - Many-to-One with Magasin: Each stock record belongs to one store
+ * - Many-to-One with Produit: Each stock record is for one product
+ * 
+ * Constraints:
+ * - Unique combination of magasinId and produitId ensures only one stock record
+ *   exists per product per store
+ */
 model Stock {
   id         Int      @id @default(autoincrement())
   magasin    Magasin  @relation(fields: [magasinId], references: [id])
@@ -40,12 +75,35 @@ model Stock {
   @@unique([magasinId, produitId])
 }
 
+/**
+ * Client Model
+ * 
+ * Represents a customer who makes purchases.
+ * Clients are identified by name and can have multiple sales transactions.
+ * 
+ * Relationships:
+ * - One-to-Many with Vente: A client can make multiple purchases
+ * 
+ * Constraints:
+ * - Unique name ensures no duplicate client records
+ */
 model Client {
   id      Int    @id @default(autoincrement())
   nom     String @unique
   ventes  Vente[]
 }
 
+/**
+ * Vente (Sale) Model
+ * 
+ * Represents a sales transaction made by a client at a specific store.
+ * Each sale consists of multiple line items and has a total amount.
+ * 
+ * Relationships:
+ * - Many-to-One with Magasin: Each sale occurs at one store
+ * - Many-to-One with Client: Each sale is made by one client
+ * - One-to-Many with LigneVente: A sale consists of multiple line items
+ */
 model Vente {
   id         Int         @id @default(autoincrement())
   magasin    Magasin     @relation(fields: [magasinId], references: [id])
@@ -57,6 +115,16 @@ model Vente {
   total      Float
 }
 
+/**
+ * LigneVente (Sale Line Item) Model
+ * 
+ * Represents a single product line in a sales transaction.
+ * Contains quantity, unit price, and references to the sale and product.
+ * 
+ * Relationships:
+ * - Many-to-One with Vente: Each line item belongs to one sale
+ * - Many-to-One with Produit: Each line item references one product
+ */
 model LigneVente {
   id        Int      @id @default(autoincrement())
   vente     Vente    @relation(fields: [venteId], references: [id])
@@ -67,6 +135,23 @@ model LigneVente {
   prixUnitaire Float
 }
 
+/**
+ * Restock Model
+ * 
+ * Represents a request from a store to restock a specific product.
+ * Tracks the requested quantity and the status of the request.
+ * 
+ * Relationships:
+ * - Many-to-One with Produit: Each restock request is for one product
+ * - Many-to-One with Magasin: Each restock request comes from one store
+ * 
+ * Status values:
+ * - "EN_ATTENTE": Request is pending review
+ * - "APPROUVE": Request has been approved
+ * - "EXPEDIE": Products have been shipped
+ * - "LIVRE": Products have been delivered
+ * - "REFUSE": Request has been denied
+ */
 model Restock {
   id           Int      @id @default(autoincrement())
   produit      Produit  @relation(fields: [produitId], references: [id])

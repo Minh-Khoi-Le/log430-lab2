@@ -1,32 +1,32 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const produits = [
-  { nom: "Baguette", prix: 2.99 },
-  { nom: "Fromage", prix: 7.99 },
-  { nom: "Jambon", prix: 4.29 },
-  { nom: "Lait", prix: 3.49 },
-  { nom: "Oeufs", prix: 3.99 },
-  { nom: "Tomate", prix: 2.19 },
-  { nom: "Beurre", prix: 5.49 },
-  { nom: "Pomme", prix: 1.59 },
-  { nom: "Poivre", prix: 1.99 },
-  { nom: "Chocolat", prix: 3.79 },
+  { nom: "Baguette", prix: 2.99, description: "Pain français classique" },
+  { nom: "Fromage", prix: 7.99, description: "Fromage affiné artisanal" },
+  { nom: "Jambon", prix: 4.29, description: "Jambon de qualité supérieure" },
+  { nom: "Lait", prix: 3.49, description: "Lait frais entier" },
+  { nom: "Oeufs", prix: 3.99, description: "Oeufs bio de poules élevées en plein air" },
+  { nom: "Tomate", prix: 2.19, description: "Tomates rouges mûres" },
+  { nom: "Beurre", prix: 5.49, description: "Beurre doux artisanal" },
+  { nom: "Pomme", prix: 1.59, description: "Pommes croquantes" },
+  { nom: "Poivre", prix: 1.99, description: "Poivre noir moulu" },
+  { nom: "Chocolat", prix: 3.79, description: "Chocolat noir 70% cacao" },
 ];
 
 const magasins = [
-  { nom: "Magasin A" },
-  { nom: "Magasin B" },
-  { nom: "Magasin C" },
-  { nom: "Magasin D" },
-  { nom: "Magasin E" },
+  { nom: "Magasin A", adresse: "1 rue de Paris" },
+  { nom: "Magasin B", adresse: "2 avenue de Lyon" },
+  { nom: "Magasin C", adresse: "3 boulevard de Lille" },
+  { nom: "Magasin D", adresse: "4 place de Bordeaux" },
+  { nom: "Magasin E", adresse: "5 chemin de Nice" },
 ];
 
 // Quelques clients fictifs
 const clients = [
-  { nom: "Alice", email: "alice@mail.com" },
-  { nom: "Bob", email: "bob@mail.com" },
-  { nom: "Chloé", email: "chloe@mail.com" }
+  { nom: "Alice" },
+  { nom: "Bob" },
+  { nom: "Chloé" }
 ];
 
 function getRandomInt(min, max) {

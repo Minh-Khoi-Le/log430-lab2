@@ -1,13 +1,20 @@
+/**
+ * Products Page
+ * 
+ * This component displays the product catalog and provides product management
+ * functionality for administrators (gestionnaire role).
+ * 
+ */
+
 import React, { useEffect, useState } from "react";
-import ProductSearch from "../components/ProductSearch";
 import ProductList from "../components/ProductList";
 import Modal from "../components/Modal";
 import ProductEditForm from "../components/ProductEditForm";
 import { useUser } from "../context/UserContext";
 
 const Products = () => {
+  // State management for products and UI
   const [produits, setProduits] = useState([]);
-  const [search, ] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [produitASupprimer, setProduitASupprimer] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -15,10 +22,14 @@ const Products = () => {
 
   const { user } = useUser();
 
-  // Chargement des produits depuis l'API
+  /**
+   * Fetch products from the API
+   * 
+   * Retrieves the product catalog from the backend and updates state
+   */
   const fetchProduits = async () => {
     try {
-      const response = await fetch("http://localhost:3800/produits");
+      const response = await fetch("http://localhost:3000/api/v1/products");
       if (!response.ok) throw new Error("Erreur lors du chargement des produits");
       const data = await response.json();
       setProduits(data);
@@ -27,38 +38,49 @@ const Products = () => {
     }
   };
 
+  // Load products when component mounts
   useEffect(() => {
     fetchProduits();
   }, []);
 
-  // Filtre sur le nom 
-  const produitsFiltres = produits.filter((p) =>
-    p.nom.toLowerCase().includes(search.toLowerCase())
-  );
-
-  // Gestion CRUD (gestionnaire seulement)
+  /**
+   * Product Management Functions
+   * 
+   * These functions handle CRUD operations for products
+   * Only available to users with gestionnaire role
+   */
+  
+  // Delete product handling
   const handleDelete = produit => {
     setProduitASupprimer(produit);
     setModalOpen(true);
   };
+  
+  // Confirm product deletion
   const confirmDelete = async () => {
-    await fetch(`http://localhost:3800/maisonmere/produits/${produitASupprimer.id}`, {
+    await fetch(`http://localhost:3000/api/v1/products/${produitASupprimer.id}`, {
       method: "DELETE",
     });
     setModalOpen(false);
     setProduitASupprimer(null);
     fetchProduits();
   };
+  
+  // Cancel product deletion
   const cancelDelete = () => {
     setModalOpen(false);
     setProduitASupprimer(null);
   };
+  
+  // Edit product handling
   const handleEdit = produit => {
     setProduitAModifier(produit);
     setEditModalOpen(true);
   };
+  
+  // Save product edits
   const saveEdit = async majProduit => {
-    await fetch(`http://localhost:3800/maisonmere/produits/${majProduit.id}`, {
+    await fetch(`http://localhost:3000/api/v1/products/${majProduit.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(majProduit),
@@ -67,6 +89,8 @@ const Products = () => {
     setProduitAModifier(null);
     fetchProduits();
   };
+  
+  // Cancel product edit
   const cancelEdit = () => {
     setEditModalOpen(false);
     setProduitAModifier(null);
@@ -78,7 +102,7 @@ const Products = () => {
       background: "#f6f6f6",
       fontFamily: "sans-serif",
     }}>
-      {/* TOP HEADER, SEARCH */}
+      {/* Main content area with product listing */}
       <div style={{
         margin: "40px 28px 0 28px",
         background: "#666",
@@ -90,13 +114,14 @@ const Products = () => {
         minHeight: 450,
         boxSizing: "border-box",
       }}>
+        {/* Product list with conditional edit/delete actions based on user role */}
         <ProductList
-          produits={produitsFiltres}
+          produits={produits}
           onDelete={user.role === "gestionnaire" ? handleDelete : undefined}
           onEdit={user.role === "gestionnaire" ? handleEdit : undefined}
         />
 
-        {/* Modals */}
+        {/* Modal for product editing */}
         <Modal
           open={editModalOpen}
           title="Modification du produit"
@@ -108,6 +133,8 @@ const Products = () => {
             onCancel={cancelEdit}
           />
         </Modal>
+        
+        {/* Confirmation modal for product deletion */}
         <Modal
           open={modalOpen}
           title="Confirmation de suppression"

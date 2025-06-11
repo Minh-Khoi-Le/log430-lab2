@@ -1,3 +1,12 @@
+/**
+ * Product Card Component
+ * 
+ * This component displays a single product in a card format.
+ * It adapts its functionality based on the user's role:
+ * - For clients: Shows add to cart button
+ * - For gestionnaires: Shows edit and delete buttons
+ */
+
 import React from "react";
 import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
@@ -17,13 +26,17 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 
 const ProductCard = ({ produit, onEdit, onDelete }) => {
+  // State for hover effects
   const [hover, setHover] = React.useState(false);
   const { addToCart } = useCart();
   const { user } = useUser();
+  
+  // Calculate total stock across all stores
   const totalStock = produit.stocks
     ? produit.stocks.reduce((sum, s) => sum + s.quantite, 0)
     : 0;
 
+  // Check if user is a client for conditional rendering
   const isClient = user?.role === "client";
 
   return (
@@ -46,14 +59,17 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
       onMouseLeave={() => setHover(false)}
       className="product-card"
     >
-      {/* ... (rest image placeholder, titres, etc) */}
+      {/* Card content with product details */}
       <CardContent sx={{ pb: 1 }}>
+        {/* Product name and price header */}
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
             {produit.nom}
           </Typography>
           <Typography variant="h6">${produit.prix.toFixed(2)}</Typography>
         </Box>
+        
+        {/* Stock availability information */}
         <Typography
           variant="body2"
           sx={{ color: "#3577d6", mt: 0.5, fontWeight: 500 }}
@@ -63,9 +79,10 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
       </CardContent>
 
       <CardActions sx={{ justifyContent: "space-between", pt: 0 }}>
-        {/* Gestionnaire: icons édition/suppression */}
+        {/* Admin actions: Edit and Delete buttons (only shown for gestionnaire role) */}
         <Fade in={hover && (!!onEdit || !!onDelete)}>
           <Box>
+            {/* Edit button */}
             {onEdit && (
               <Tooltip title="Modifier" placement="top" arrow>
                 <IconButton
@@ -80,6 +97,8 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
                 </IconButton>
               </Tooltip>
             )}
+            
+            {/* Delete button */}
             {onDelete && (
               <Tooltip title="Supprimer" placement="top" arrow>
                 <IconButton
@@ -96,7 +115,8 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
             )}
           </Box>
         </Fade>
-        {/* Client: bouton ajouter au panier */}
+        
+        {/* Client action: Add to cart button (only shown for client role) */}
         {isClient && (
           <Box sx={{ width: "100%" }}>
             <Button

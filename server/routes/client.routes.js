@@ -1,27 +1,72 @@
-const express = require('express');
-const ClientDAO = require('../dao/client.dao');
+/**
+ * Client Routes
+ * 
+ * Base path: /api/v1/clients
+ * 
+ * These routes are used by:
+ * - Client management interfaces
+ * - Sales interfaces for customer lookup (incoming)
+ */
+
+import express from 'express';
+import * as controller from '../controllers/client.controller.js';
+
 const router = express.Router();
 
-// Inscription client
-router.post('/register', async (req, res) => {
-  try {
-    const { nom } = req.body;
-    const client = await ClientDAO.create({ nom });
-    res.status(201).json(client);
-  } catch (err) {
-    res.status(400).json({ error: "Erreur lors de la création du client", details: err.message });
-  }
-});
+/**
+ * GET /api/v1/clients
+ * 
+ * List all clients
+ * 
+ * Used by:
+ * - Client management interfaces
+ * - Sales interfaces for customer selection
+ * - Admin dashboards
+ */
+router.get('/', controller.list);
 
-// Obtenir l’historique d’achats d’un client
-router.get('/:clientId/achats', async (req, res) => {
-  try {
-    const VenteDAO = require('../dao/vente.dao');
-    const ventes = await VenteDAO.getByClient(req.params.clientId);
-    res.json(ventes);
-  } catch (err) {
-    res.status(500).json({ error: "Erreur lors de la récupération des achats", details: err.message });
-  }
-});
+/**
+ * GET /api/v1/clients/:id
+ * 
+ * Get detailed information about a specific client
+ * 
+ * Path parameters:
+ * - id: Client ID
+ * 
+ * Used by:
+ * - Client detail pages
+ * - Customer profile interfaces
+ */
+router.get('/:id', controller.get);
 
-module.exports = router;
+/**
+ * POST /api/v1/clients
+ * 
+ * Create a new client
+ * 
+ * Request body:
+ * - nom: Client name (required)
+ * 
+ * Used by:
+ * - Client management interfaces
+ * - Sales interfaces for adding new customers
+ * - Customer registration forms
+ */
+router.post('/', controller.create);
+
+/**
+ * GET /api/v1/clients/:id/ventes
+ * 
+ * Get sales history for a specific client
+ * 
+ * Path parameters:
+ * - id: Client ID
+ * 
+ * Used by:
+ * - Client detail pages
+ * - Customer history views
+ * - Sales analysis interfaces
+ */
+router.get('/:id/ventes', controller.ventes);
+
+export default router;

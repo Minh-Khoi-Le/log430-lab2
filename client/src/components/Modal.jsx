@@ -8,7 +8,7 @@ const Modal = ({ open, title, children, onClose, onConfirm }) => {
       <div className="modal-content">
         {title && <h2>{title}</h2>}
         <div>{children}</div>
-        {/* N'affiche la barre d'action que si onConfirm est défini */}
+        {/* Show action bar only if onConfirm is defined */}
         {onConfirm && (
           <div className="modal-actions">
             <button className="btn" onClick={onClose}>Annuler</button>
