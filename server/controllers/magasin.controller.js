@@ -47,15 +47,15 @@ export async function get(req, res, next) {
  * Create Store Controller
  * 
  * Creates a new store with the provided data.
+ * Also initializes stock entries with quantity 0 for all existing products.
  * 
- 
  * @param {Request} req - Express request object with store data in body
  * @param {Response} res - Express response object
  * @param {Function} next - Express next middleware function
  */
 export async function create(req, res, next) {
   try {
-    const magasin = await MagasinDAO.create(req.body);
+    const magasin = await MagasinDAO.createWithDefaultStock(req.body);
     res.status(201).json(magasin);
   } catch (err) { next(err); }
 }

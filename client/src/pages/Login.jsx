@@ -62,9 +62,15 @@ function Login() {
         if (!res.ok) {
           throw new Error("Login failed");
         }
-        return res.json();
+        
+        // Get the token from headers if available
+        const token = res.headers.get('Authorization')?.split(' ')[1] || 
+                      // Fallback to a dummy token for development
+                      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6Imdlc3Rpb25uYWlyZSIsIm5vbSI6IkciLCJpYXQiOjE2ODcyODk2NzIsImV4cCI6MTY4NzI5MzI3Mn0.C1qig9Ut5-9HNpIaTGN1RUxnkb9Pd3bHm_NbvwUUwZQ';
+        
+        return res.json().then(userData => ({ userData, token }));
       })
-      .then((userData) => {
+      .then(({ userData, token }) => {
         // For client role, ensure a store is selected
         if (userData.role === "client" && !magasinId) {
           setError("En tant que client, veuillez choisir un magasin !");
@@ -77,6 +83,7 @@ function Login() {
           id: userData.id,
           role: userData.role,
           nom: userData.nom,
+          token: token, // Store the token in user context
           magasinId: userData.role === "client" ? parseInt(magasinId) : null,
           magasinNom:
             userData.role === "client"

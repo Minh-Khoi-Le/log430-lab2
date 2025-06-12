@@ -21,11 +21,7 @@ const router = express.Router();
  * GET /api/v1/products
  * 
  * List all products with optional pagination and sorting
- * 
- * Query parameters:
- * - page: Page number (starting from 1)
- * - size: Number of items per page (max 100)
- * - sort: Field to sort by
+ *
  * 
  * Used by:
  * - Store interfaces to display product catalog
@@ -44,9 +40,6 @@ router.get('/',
  * 
  * Get detailed information about a specific product
  * 
- * Path parameters:
- * - id: Product ID
- * 
  * Used by:
  * - Product detail pages
  * - Sales interfaces when adding products to sales
@@ -62,14 +55,6 @@ router.get('/:id',
  * POST /api/v1/products
  * 
  * Create a new product
- * 
- * Request body:
- * - name: Product name (required)
- * - price: Product price (required)
- * - description: Product description (optional)
- * 
- * Authentication:
- * - Requires valid JWT token
  * 
  * Used by:
  * - Admin interfaces for product catalog management
@@ -89,17 +74,6 @@ router.post('/',
  * 
  * Update an existing product
  * 
- * Path parameters:
- * - id: Product ID
- * 
- * Request body:
- * - name: Product name (optional)
- * - price: Product price (optional)
- * - description: Product description (optional)
- * 
- * Authentication:
- * - Requires valid JWT token
- * 
  * Used by:
  * - Admin interfaces for product catalog management
  * - Parent company (maisonmere) to update product information
@@ -118,13 +92,6 @@ router.put('/:id',
  * DELETE /api/v1/products/:id
  * 
  * Delete a product
- * 
- * Path parameters:
- * - id: Product ID
- * 
- * Authentication:
- * - Requires valid JWT token
- * 
  * Used by:
  * - Admin interfaces for product catalog management
  * - Parent company (maisonmere) to remove discontinued products

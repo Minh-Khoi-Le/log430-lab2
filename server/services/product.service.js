@@ -45,6 +45,7 @@ export async function get(id) {
  * Create Product Service
  * 
  * Creates a new product with the provided data.
+ * Maps API field names to database field names.
  * 
  * @param {Object} data - Product data
  * @param {string} data.name - Product name
@@ -53,20 +54,36 @@ export async function get(id) {
  * @returns {Promise<Object>} - Promise resolving to created product
  */
 export async function create(data) {
-  return dao.insert(data);
+  // Map API field names to database field names
+  const productData = {
+    nom: data.name,
+    prix: data.price,
+    description: data.description
+  };
+  
+  // Use Prisma transaction to create product and initialize stock
+  return dao.insertWithDefaultStock(productData);
 }
 
 /**
  * Update Product Service
  * 
  * Updates an existing product with the provided data.
+ * Maps API field names to database field names.
  * 
  * @param {number|string} id - Product ID
  * @param {Object} data - Updated product data
  * @returns {Promise<Object|null>} - Promise resolving to updated product or null if not found
  */
 export async function update(id, data) {
-  return dao.update(id, data);
+  // Map API field names to database field names
+  const productData = {};
+  
+  if (data.name !== undefined) productData.nom = data.name;
+  if (data.price !== undefined) productData.prix = data.price;
+  if (data.description !== undefined) productData.description = data.description;
+  
+  return dao.update(id, productData);
 }
 
 /**
@@ -78,5 +95,11 @@ export async function update(id, data) {
  * @returns {Promise<boolean>} - Promise resolving to true if deleted, false if not found
  */
 export async function remove(id) {
-  return dao.del(id);
+  try {
+    const product = await dao.del(id);
+    return !!product; // Return true if product was deleted successfully
+  } catch (error) {
+    // Rethrow the error to be handled by the controller
+    throw error;
+  }
 } 

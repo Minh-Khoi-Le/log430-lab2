@@ -17,8 +17,13 @@ import {
   Switch, 
   Typography, 
   Paper,
-  Divider 
+  Divider,
+  Alert,
+  Snackbar,
+  Button,
+  Fab
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
 const Products = () => {
   // State management for products and UI
@@ -28,6 +33,8 @@ const Products = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [produitAModifier, setProduitAModifier] = useState(null);
   const [hideUnavailable, setHideUnavailable] = useState(false);
+  const [error, setError] = useState(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   const { user } = useUser();
 
@@ -44,6 +51,7 @@ const Products = () => {
       setProduits(data);
     } catch (error) {
       console.error("Erreur:", error);
+      setError("Erreur lors du chargement des produits");
     }
   };
 
@@ -67,12 +75,38 @@ const Products = () => {
   
   // Confirm product deletion
   const confirmDelete = async () => {
-    await fetch(`http://localhost:3000/api/v1/products/${produitASupprimer.id}`, {
-      method: "DELETE",
-    });
-    setModalOpen(false);
-    setProduitASupprimer(null);
-    fetchProduits();
+    try {
+      setError(null);
+      
+      const response = await fetch(`http://localhost:3000/api/v1/products/${produitASupprimer.id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${user.token || 'dummy-token'}`
+        }
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Vous n'êtes pas autorisé à effectuer cette action. Veuillez vous reconnecter.");
+        } else if (response.status === 403) {
+          throw new Error("Vous n'avez pas les droits nécessaires pour cette action.");
+        } else if (response.status === 409 || response.status === 500) {
+          // 409 Conflict or 500 with constraint error
+          throw new Error("Ce produit ne peut pas être supprimé car il est utilisé dans des stocks ou des ventes.");
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || "Erreur lors de la suppression du produit");
+        }
+      }
+      
+      setModalOpen(false);
+      setProduitASupprimer(null);
+      fetchProduits();
+    } catch (err) {
+      console.error("Erreur:", err);
+      setError(err.message);
+      setModalOpen(false);
+    }
   };
   
   // Cancel product deletion
@@ -89,14 +123,45 @@ const Products = () => {
   
   // Save product edits
   const saveEdit = async majProduit => {
-    await fetch(`http://localhost:3000/api/v1/products/${majProduit.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(majProduit),
-    });
-    setEditModalOpen(false);
-    setProduitAModifier(null);
-    fetchProduits();
+    try {
+      // Create a copy of the product with only the fields we want to update
+      const productToUpdate = {
+        name: majProduit.nom,
+        price: majProduit.prix,
+        description: majProduit.description
+      };
+      
+      const response = await fetch(`http://localhost:3000/api/v1/products/${majProduit.id}`, {
+        method: "PUT",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token || 'dummy-token'}`
+        },
+        body: JSON.stringify(productToUpdate),
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Vous n'êtes pas autorisé à effectuer cette action. Veuillez vous reconnecter.");
+        } else if (response.status === 403) {
+          throw new Error("Vous n'avez pas les droits nécessaires pour cette action.");
+        } else if (response.status === 400) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || "Validation erreur: Veuillez vérifier les champs requis.");
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || "Erreur lors de la modification du produit");
+        }
+      }
+      
+      setEditModalOpen(false);
+      setProduitAModifier(null);
+      fetchProduits();
+    } catch (err) {
+      console.error("Erreur:", err);
+      setError(err.message);
+      setEditModalOpen(false);
+    }
   };
   
   // Cancel product edit
@@ -104,10 +169,65 @@ const Products = () => {
     setEditModalOpen(false);
     setProduitAModifier(null);
   };
+  
+  // Open add product modal
+  const handleOpenAddModal = () => {
+    setAddModalOpen(true);
+  };
+  
+  // Close add product modal
+  const handleCloseAddModal = () => {
+    setAddModalOpen(false);
+  };
+  
+  // Add new product
+  const handleAddProduct = async (newProduct) => {
+    try {
+      setError(null);
+      
+      const response = await fetch("http://localhost:3000/api/v1/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token || 'dummy-token'}`
+        },
+        body: JSON.stringify({
+          name: newProduct.nom,
+          price: parseFloat(newProduct.prix),
+          description: newProduct.description || ""
+        }),
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Vous n'êtes pas autorisé à effectuer cette action. Veuillez vous reconnecter.");
+        } else if (response.status === 403) {
+          throw new Error("Vous n'avez pas les droits nécessaires pour cette action.");
+        } else if (response.status === 400) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || "Validation erreur: Veuillez vérifier les champs requis.");
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || "Erreur lors de l'ajout du produit");
+        }
+      }
+      
+      setAddModalOpen(false);
+      fetchProduits();
+    } catch (err) {
+      console.error("Erreur:", err);
+      setError(err.message);
+    }
+  };
 
   // Handle availability filter change
   const handleFilterChange = (event) => {
     setHideUnavailable(event.target.checked);
+  };
+  
+  // Handle error snackbar close
+  const handleCloseError = () => {
+    setError(null);
   };
 
   return (
@@ -115,14 +235,15 @@ const Products = () => {
       minHeight: "100vh",
       background: "#f6f6f6",
       fontFamily: "sans-serif",
+      position: "relative"
     }}>
       {/* Header with title and filters */}
-      {user?.role === "client" && (
-        <Paper elevation={1} sx={{ mx: 4, mt: 4, p: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6">
-              Catalogue de produits
-            </Typography>
+      <Paper elevation={1} sx={{ mx: 4, mt: 4, p: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6">
+            Catalogue de produits
+          </Typography>
+          {user?.role === "client" ? (
             <FormControlLabel
               control={
                 <Switch 
@@ -134,13 +255,22 @@ const Products = () => {
               label="Afficher uniquement les produits disponibles"
               labelPlacement="start"
             />
-          </Box>
-        </Paper>
-      )}
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={handleOpenAddModal}
+            >
+              Ajouter un produit
+            </Button>
+          )}
+        </Box>
+      </Paper>
 
       {/* Main content area with product listing */}
       <div style={{
-        margin: user?.role === "client" ? "20px 28px 0 28px" : "40px 28px 0 28px",
+        margin: "20px 28px 0 28px",
         background: "#666",
         borderRadius: 4,
         padding: "40px 12px 60px 12px",
@@ -171,6 +301,20 @@ const Products = () => {
           />
         </Modal>
         
+        {/* Modal for adding new product */}
+        <Modal
+          open={addModalOpen}
+          title="Ajouter un nouveau produit"
+          onClose={handleCloseAddModal}
+        >
+          <ProductEditForm
+            produit={{ nom: "", prix: 0, stocks: [] }}
+            onSave={handleAddProduct}
+            onCancel={handleCloseAddModal}
+            isNewProduct
+          />
+        </Modal>
+        
         {/* Confirmation modal for product deletion */}
         <Modal
           open={modalOpen}
@@ -182,6 +326,39 @@ const Products = () => {
             Êtes-vous sûr de vouloir supprimer <b>{produitASupprimer?.nom}</b> ?
           </div>
         </Modal>
+        
+        {/* Error Snackbar */}
+        <Snackbar 
+          open={!!error} 
+          autoHideDuration={6000} 
+          onClose={handleCloseError}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert 
+            onClose={handleCloseError} 
+            severity="error" 
+            sx={{ width: '100%' }}
+          >
+            {error}
+          </Alert>
+        </Snackbar>
+        
+        {/* Floating action button for mobile */}
+        {user?.role === "gestionnaire" && (
+          <Fab 
+            color="primary" 
+            aria-label="add"
+            onClick={handleOpenAddModal}
+            sx={{ 
+              position: 'fixed', 
+              bottom: 16, 
+              right: 16,
+              display: { xs: 'flex', sm: 'none' }
+            }}
+          >
+            <AddIcon />
+          </Fab>
+        )}
       </div>
     </div>
   );

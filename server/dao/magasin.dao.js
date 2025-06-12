@@ -15,6 +15,44 @@ const MagasinDAO = {
   create: async (data) => prisma.magasin.create({ data }),
   
   /**
+   * Create Store with Default Stock
+   * 
+   * Creates a new store and initializes stock entries with quantity 0 for all existing products.
+   * This ensures that the new store has stock records for all products.
+   * 
+   * @param {Object} data - Store data
+   * @param {string} data.nom - Store name
+   * @param {string} [data.adresse] - Store address (optional)
+   * @returns {Promise<Object>} - Promise resolving to created store with stock information
+   */
+  createWithDefaultStock: async (data) => {
+    return prisma.$transaction(async (tx) => {
+      // First, create the store
+      const store = await tx.magasin.create({ data });
+      
+      // Then, get all existing products
+      const products = await tx.produit.findMany();
+      
+      // Create stock entries with quantity 0 for each product
+      for (const product of products) {
+        await tx.stock.create({
+          data: {
+            magasinId: store.id,
+            produitId: product.id,
+            quantite: 0
+          }
+        });
+      }
+      
+      // Return the store with its stock information
+      return tx.magasin.findUnique({
+        where: { id: store.id },
+        include: { stocks: { include: { produit: true } } }
+      });
+    });
+  },
+  
+  /**
    * Get Store by ID
    * 
    * Retrieves a single store by its ID.

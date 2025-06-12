@@ -28,7 +28,9 @@ app.use(helmet());
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Authorization'],
+  credentials: true
 }));
 
 /**
@@ -67,6 +69,7 @@ app.use('/api/v1/stores', (await import('./routes/magasin.routes.js')).default);
 app.use('/api/v1/sales', (await import('./routes/vente.routes.js')).default);
 app.use('/api/v1/maisonmere', (await import('./routes/maisonmere.routes.js')).default);
 app.use('/api/v1/users', (await import('./routes/user.routes.js')).default);
+app.use('/api/v1/stock', (await import('./routes/stock.routes.js')).default);
 
 /**
  * Global Error Handling Middleware

@@ -1,15 +1,11 @@
 /**
- * Maisonmere Routes
+ * MaisonMere Routes
  * 
  * Base path: /api/v1/maisonmere
- * 
- * These routes are used by:
- * - Parent company administrators
- * - Central management dashboards
  */
 
-import { PrismaClient } from '@prisma/client';
 import express from 'express';
+import { PrismaClient } from '@prisma/client';
 import ProduitDAO from '../dao/produit.dao.js';
 import MagasinDAO from '../dao/magasin.dao.js';
 import * as controller from '../controllers/maisonmere.controller.js';
@@ -80,11 +76,41 @@ router.get("/produits/:id", async (req, res) => {
 router.post("/produits", async (req, res) => {
   try {
     const { nom, prix, stock } = req.body;
-    const nouveau = await ProduitDAO.create({
+    
+    // Create the product first
+    const productData = {
       nom,
-      prix: parseFloat(prix),
-      stock: parseInt(stock),
+      prix: parseFloat(prix)
+    };
+    
+    // Use a transaction to create the product and set initial stock levels
+    const nouveau = await prisma.$transaction(async (tx) => {
+      // Create the product
+      const product = await tx.produit.create({ data: productData });
+      
+      // Get all stores
+      const stores = await tx.magasin.findMany();
+      
+      // Create stock entries for each store
+      // Use the provided stock value or default to 0
+      const stockValue = stock !== undefined ? parseInt(stock) : 0;
+      for (const store of stores) {
+        await tx.stock.create({
+          data: {
+            produitId: product.id,
+            magasinId: store.id,
+            quantite: stockValue
+          }
+        });
+      }
+      
+      // Return the product with stock information
+      return tx.produit.findUnique({
+        where: { id: product.id },
+        include: { stocks: true }
+      });
     });
+    
     res.status(201).json(nouveau);
   } catch (err) {
     res
@@ -170,7 +196,7 @@ router.delete("/produits/:id", async (req, res) => {
 router.post("/magasins", async (req, res) => {
   try {
     const { nom, adresse } = req.body;
-    const magasin = await MagasinDAO.create({ nom, adresse });
+    const magasin = await MagasinDAO.createWithDefaultStock({ nom, adresse });
     res.status(201).json(magasin);
   } catch (err) {
     res

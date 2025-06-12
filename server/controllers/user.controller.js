@@ -1,11 +1,15 @@
 import UserDAO from '../dao/user.dao.js';
 import VenteDAO from '../dao/vente.dao.js';
+import jwt from 'jsonwebtoken';
+
+// JWT secret key from environment variables or fallback to default (for development only)
+const SECRET = process.env.JWT_SECRET || 'lab3-secret';
 
 /**
  * Login Controller
  * 
  * Authenticates a user based on username and password.
- * In this simple implementation, we just check if the user exists and return the user.
+ * Generates a JWT token and returns it in the Authorization header.
  * 
  * @param {Request} req - Express request object with login data in body
  * @param {Response} res - Express response object
@@ -30,6 +34,20 @@ export async function login(req, res, next) {
     if (user.password !== password) {
       return res.status(401).json({ error: 'Mot de passe incorrect' });
     }
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        id: user.id, 
+        role: user.role, 
+        nom: user.nom 
+      }, 
+      SECRET, 
+      { expiresIn: '1h' }
+    );
+    
+    // Set token in Authorization header
+    res.set('Authorization', `Bearer ${token}`);
     
     // Return user data without password
     const { password: _, ...userWithoutPassword } = user;

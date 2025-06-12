@@ -68,6 +68,11 @@ Persistance : Prisma ORM / SQLite
 
 Conteneurisation : Docker Compose (client/server)
 
+## Commandes Prisma pour gerer la persistence
+
+npx prisma migrate dev --name init
+npx prisma migrate reset
+
 ## Montrer l'arborescence du projet
 
 treee -l 4 --ignore "node_modules,.git" -o docs\structure.txt

@@ -52,6 +52,7 @@ export async function get(req, res, next) {
  * Create Product Controller
  * 
  * Creates a new product with the provided data.
+ * Automatically creates stock entries with quantity 0 for all stores.
  * 
  * @param {Request} req - Express request object with product data in body
  * @param {Response} res - Express response object
@@ -104,6 +105,12 @@ export async function remove(req, res, next) {
     }
     res.sendStatus(204);
   } catch (error) {
-    next(error);
+    // Check for foreign key constraint error
+    if (error.code === 'P2003' || error.code === 'P2014') {
+      // Convert DB error to API error with 409 Conflict status
+      next(new ApiError(409, 'Cannot delete product: it is referenced in stock or sales records'));
+    } else {
+      next(error);
+    }
   }
 } 
