@@ -97,6 +97,7 @@ treee -l 4 --ignore "node_modules,.git" -o docs\structure.txt
 
 ## Arborescene
 
+```text
 ├── client
 │ ├── Dockerfile
 │ ├── eslint.config.js
@@ -178,3 +179,5 @@ treee -l 4 --ignore "node_modules,.git" -o docs\structure.txt
 ├── setup.js
 ├── stock.test.js
 └── ventes.test.js
+
+```
