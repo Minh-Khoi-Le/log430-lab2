@@ -1,32 +1,33 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const produits = [
-  { nom: "Baguette", prix: 2.99 },
-  { nom: "Fromage", prix: 7.99 },
-  { nom: "Jambon", prix: 4.29 },
-  { nom: "Lait", prix: 3.49 },
-  { nom: "Oeufs", prix: 3.99 },
-  { nom: "Tomate", prix: 2.19 },
-  { nom: "Beurre", prix: 5.49 },
-  { nom: "Pomme", prix: 1.59 },
-  { nom: "Poivre", prix: 1.99 },
-  { nom: "Chocolat", prix: 3.79 },
+  { nom: "Baguette", prix: 2.99, description: "Pain français classique" },
+  { nom: "Fromage", prix: 7.99, description: "Fromage affiné artisanal" },
+  { nom: "Jambon", prix: 4.29, description: "Jambon de qualité supérieure" },
+  { nom: "Lait", prix: 3.49, description: "Lait frais entier" },
+  { nom: "Oeufs", prix: 3.99, description: "Oeufs bio de poules élevées en plein air" },
+  { nom: "Tomate", prix: 2.19, description: "Tomates rouges mûres" },
+  { nom: "Beurre", prix: 5.49, description: "Beurre doux artisanal" },
+  { nom: "Pomme", prix: 1.59, description: "Pommes croquantes" },
+  { nom: "Poivre", prix: 1.99, description: "Poivre noir moulu" },
+  { nom: "Chocolat", prix: 3.79, description: "Chocolat noir 70% cacao" },
 ];
 
 const magasins = [
-  { nom: "Magasin A" },
-  { nom: "Magasin B" },
-  { nom: "Magasin C" },
-  { nom: "Magasin D" },
-  { nom: "Magasin E" },
+  { nom: "Magasin A", adresse: "1 rue de Paris" },
+  { nom: "Magasin B", adresse: "2 avenue de Lyon" },
+  { nom: "Magasin C", adresse: "3 boulevard de Lille" },
+  { nom: "Magasin D", adresse: "4 place de Bordeaux" },
+  { nom: "Magasin E", adresse: "5 chemin de Nice" },
 ];
 
-// Quelques clients fictifs
-const clients = [
-  { nom: "Alice", email: "alice@mail.com" },
-  { nom: "Bob", email: "bob@mail.com" },
-  { nom: "Chloé", email: "chloe@mail.com" }
+// Users with different roles
+const users = [
+  { nom: "G", role: "gestionnaire", password: "p" },
+  { nom: "C", role: "client", password: "p" },
+  { nom: "Alice", role: "client", password: "password" },
+  { nom: "Bob", role: "client", password: "password" },
 ];
 
 function getRandomInt(min, max) {
@@ -34,25 +35,26 @@ function getRandomInt(min, max) {
 }
 
 async function main() {
-  // Vider les tables dans l'ordre pour respecter les contraintes de clés étrangères
+  // Delete all data in the database
   await prisma.ligneVente?.deleteMany?.();
   await prisma.vente?.deleteMany?.();
   await prisma.stock?.deleteMany?.();
+  await prisma.restock?.deleteMany?.();
   await prisma.magasin.deleteMany({});
   await prisma.produit.deleteMany({});
-  await prisma.client?.deleteMany?.();
+  await prisma.user?.deleteMany?.();
 
-  // Insérer produits, magasins et clients
+  // Insert products, stores and users
   await prisma.produit.createMany({ data: produits });
   await prisma.magasin.createMany({ data: magasins });
-  await prisma.client.createMany({ data: clients });
+  await prisma.user.createMany({ data: users });
 
-  // On récupère les produits, magasins et clients insérés
+  // Get the products, stores and users inserted
   const produitsList = await prisma.produit.findMany();
   const magasinsList = await prisma.magasin.findMany();
-  const clientsList = await prisma.client.findMany();
+  const clientsList = await prisma.user.findMany({ where: { role: 'client' } });
 
-  // Création des stocks pour chaque produit X magasin
+  // Create stocks for each product X store
   for (const magasin of magasinsList) {
     for (const produit of produitsList) {
       await prisma.stock.create({
@@ -65,32 +67,32 @@ async function main() {
     }
   }
 
-  // Génération de ventes aléatoires pour chaque magasin
+  // Generate random sales for each store
   for (const magasin of magasinsList) {
-    const nbVentes = getRandomInt(5, 10); // 5 à 10 ventes par magasin
+    const nbVentes = getRandomInt(5, 10); // 5 to 10 sales per store
     for (let v = 0; v < nbVentes; v++) {
-      // Client au hasard
+      // Random client among the users with role 'client'
       const client = clientsList[getRandomInt(0, clientsList.length - 1)];
-      // 1 à 4 produits différents par vente
+      // 1 to 4 different products per sale
       const produitsChoisis = [...produitsList]
         .sort(() => Math.random() - 0.5)
         .slice(0, getRandomInt(1, 4));
 
-      // Générer lignes de vente
+      // Generate sale lines
       const lignes = produitsChoisis.map(produit => ({
         produitId: produit.id,
         quantite: getRandomInt(1, 5),
         prixUnitaire: produit.prix
       }));
 
-      // Calcule le total de la vente
+      // Calculate the total of the sale
       const total = lignes.reduce((acc, l) => acc + l.quantite * l.prixUnitaire, 0);
 
-      // Crée la vente avec ses lignes associées
+      // Create the sale with its associated lines
       await prisma.vente.create({
         data: {
           magasinId: magasin.id,
-          clientId: client.id,
+          userId: client.id,
           total,
           lignes: {
             create: lignes
@@ -100,7 +102,7 @@ async function main() {
     }
   }
 
-  console.log("Données seedées (produits, magasins, stocks, clients, ventes) !");
+  console.log("Données seedées (produits, magasins, stocks, users, ventes) !");
 }
 
 main()

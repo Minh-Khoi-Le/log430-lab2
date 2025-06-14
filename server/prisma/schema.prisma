@@ -10,16 +10,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
+/**
+ * Magasin (Store) Model
+ * 
+ * Represents a physical store location in the retail network.
+ * Each store has inventory stock, sales.
+ * 
+ * Relationships:
+ * - One-to-Many with Stock: A store has multiple product stock records
+ * - One-to-Many with Vente: A store processes multiple sales
+ */
 model Magasin {
   id        Int      @id @default(autoincrement())
   nom       String
   adresse   String?
   stocks    Stock[]
   ventes    Vente[]
-  demandesRestock Restock[] @relation("DemandeMagasin")
 }
 
+/**
+ * Produit Model
+ * 
+ * Represents a product in the retail catalog.
+ * Products are stocked in stores, sold through sales.
+ * 
+ * Relationships:
+ * - One-to-Many with Stock: A product can be stocked in multiple stores
+ * - One-to-Many with LigneVente: A product can appear in multiple sale line items
+ */
 model Produit {
   id        Int      @id @default(autoincrement())
   nom       String
@@ -27,9 +45,22 @@ model Produit {
   description String?
   stocks    Stock[]
   lignesVente LigneVente[]
-  restocks  Restock[]
 }
 
+/**
+ * Stock Model
+ * 
+ * Represents the inventory level of a specific product in a specific store.
+ * This is a join table with additional data (quantity) between Magasin and Produit.
+ * 
+ * Relationships:
+ * - Many-to-One with Magasin: Each stock record belongs to one store
+ * - Many-to-One with Produit: Each stock record is for one product
+ * 
+ * Constraints:
+ * - Unique combination of magasinId and produitId ensures only one stock record
+ *   exists per product per store
+ */
 model Stock {
   id         Int      @id @default(autoincrement())
   magasin    Magasin  @relation(fields: [magasinId], references: [id])
@@ -40,23 +71,59 @@ model Stock {
   @@unique([magasinId, produitId])
 }
 
-model Client {
+/**
+ * User Model
+ * 
+ * Represents a user who can either be a client or gestionnaire
+ * Users are identified by name and can have multiple sales transactions if they are clients.
+ * 
+ * Relationships:
+ * - One-to-Many with Vente: A user (client) can make multiple purchases
+ * 
+ * Constraints:
+ * - Unique name ensures no duplicate user records
+ * - Role field indicates whether the user is a 'client' or 'gestionnaire'
+ */
+model User {
   id      Int    @id @default(autoincrement())
   nom     String @unique
+  role    String // 'client' or 'gestionnaire'
+  password String @default("password") // Simple authentication
   ventes  Vente[]
 }
 
+/**
+ * Vente Model
+ * 
+ * Represents a sales transaction made by a user at a specific store.
+ * Each sale consists of multiple line items and has a total amount.
+ * 
+ * Relationships:
+ * - Many-to-One with Magasin: Each sale occurs at one store
+ * - Many-to-One with User: Each sale is made by one user (client)
+ * - One-to-Many with LigneVente: A sale consists of multiple line items
+ */
 model Vente {
   id         Int         @id @default(autoincrement())
   magasin    Magasin     @relation(fields: [magasinId], references: [id])
   magasinId  Int
-  client     Client      @relation(fields: [clientId], references: [id])
-  clientId   Int
+  user       User        @relation(fields: [userId], references: [id])
+  userId     Int
   date       DateTime    @default(now())
   lignes     LigneVente[]
   total      Float
 }
 
+/**
+ * LigneVente Model
+ * 
+ * Represents a single product line in a sales transaction.
+ * Contains quantity, unit price, and references to the sale and product.
+ * 
+ * Relationships:
+ * - Many-to-One with Vente: Each line item belongs to one sale
+ * - Many-to-One with Produit: Each line item references one product
+ */
 model LigneVente {
   id        Int      @id @default(autoincrement())
   vente     Vente    @relation(fields: [venteId], references: [id])
@@ -66,16 +133,4 @@ model LigneVente {
   quantite  Int
   prixUnitaire Float
 }
-
-model Restock {
-  id           Int      @id @default(autoincrement())
-  produit      Produit  @relation(fields: [produitId], references: [id])
-  produitId    Int
-  magasin      Magasin  @relation("DemandeMagasin", fields: [magasinId], references: [id])
-  magasinId    Int
-  quantite     Int
-  statut       String   
-  createdAt    DateTime @default(now())
-}
-
 

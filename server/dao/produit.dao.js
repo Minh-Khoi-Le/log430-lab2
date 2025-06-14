@@ -1,18 +1,149 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const ProduitDAO = {
-   getAll: () => prisma.produit.findMany({
+  /**
+   * Find All Products
+   * 
+   * Retrieves a paginated and optionally sorted list of products.
+   * Includes related stock information for each product.
+   * 
+   * @param {Object} options - Query options
+   * @param {number} [options.offset=0] - Number of records to skip
+   * @param {number} [options.limit=10] - Maximum number of records to return
+   * @param {string} [options.sort] - Field to sort by
+   * @returns {Promise<Array>} - Promise resolving to array of products with their stock information
+   */
+  findAll: async ({ offset = 0, limit = 10, sort } = {}) => {
+    return prisma.produit.findMany({
+      skip: offset,
+      take: limit,
+      orderBy: sort ? { [sort]: 'asc' } : undefined,
+      include: { stocks: true }
+    });
+  },
+  
+  /**
+   * Find Product by ID
+   * 
+   * Retrieves a single product by its ID.
+   * Includes related stock information.
+   * 
+   * @param {number|string} id - Product ID
+   * @returns {Promise<Object|null>} - Promise resolving to product object or null if not found
+   */
+  findById: async (id) => prisma.produit.findUnique({ 
+    where: { id: Number(id) }, 
     include: { stocks: true } 
   }),
-  getById: (id) => prisma.produit.findUnique({
-    where: { id: parseInt(id) },
-    include: { stocks: true }
-  }),
-
-  create: (data) => prisma.produit.create({ data }),
-  update: (id, data) => prisma.produit.update({ where: { id: parseInt(id) }, data }),
-  delete: (id) => prisma.produit.delete({ where: { id: parseInt(id) } }),
+  
+  /**
+   * Insert Product
+   * 
+   * Creates a new product in the database.
+   * 
+   * @param {Object} data - Product data
+   * @returns {Promise<Object>} - Promise resolving to created product
+   */
+  insert: async (data) => prisma.produit.create({ data }),
+  
+  /**
+   * Insert Product with Default Stock
+   * 
+   * Creates a new product and initializes stock entries with quantity 0 for all stores.
+   * This ensures that all stores have a stock record for the new product.
+   * 
+   * @param {Object} data - Product data
+   * @returns {Promise<Object>} - Promise resolving to created product with stock information
+   */
+  insertWithDefaultStock: async (data) => {
+    return prisma.$transaction(async (tx) => {
+      // First, create the product
+      const product = await tx.produit.create({ data });
+      
+      // Then, get all stores
+      const stores = await tx.magasin.findMany();
+      
+      // Create stock entries with quantity 0 for each store
+      for (const store of stores) {
+        await tx.stock.create({
+          data: {
+            produitId: product.id,
+            magasinId: store.id,
+            quantite: 0
+          }
+        });
+      }
+      
+      // Return the product with its stock information
+      return tx.produit.findUnique({
+        where: { id: product.id },
+        include: { stocks: true }
+      });
+    });
+  },
+  
+  /**
+   * Update Product
+   * 
+   * Updates an existing product in the database.
+   * Stocks field is excluded to prevent Prisma validation errors. (Can be modified after update in edit form)
+   * 
+   * @param {number|string} id - Product ID
+   * @param {Object} data - Updated product data
+   * @returns {Promise<Object>} - Promise resolving to updated product
+   */
+  update: async (id, data) => {
+    // Extract all the fields, excluding stocks and any other fields that might cause validation errors
+    const { 
+      nom, 
+      prix, 
+      description 
+    } = data;
+    
+    // Create a clean update object with only valid fields
+    const updateData = {};
+    if (nom !== undefined) updateData.nom = nom;
+    if (prix !== undefined) updateData.prix = prix;
+    if (description !== undefined) updateData.description = description;
+    
+    return prisma.produit.update({ 
+      where: { id: Number(id) }, 
+      data: updateData,
+      include: { stocks: true }
+    });
+  },
+  
+  /**
+   * Delete Product
+   * 
+   * Deletes a product from the database.
+   * First deletes all related stock records to prevent foreign key constraint violations.
+   * 
+   * @param {number|string} id - Product ID
+   * @returns {Promise<Object>} - Promise resolving to deleted product
+   */
+  del: async (id) => {
+    const numericId = Number(id);
+    
+    // Use a transaction to ensure both operations succeed or fail together
+    return prisma.$transaction(async (tx) => {
+      // First, delete all stock records associated with this product
+      await tx.stock.deleteMany({
+        where: { produitId: numericId }
+      });
+      
+      // Also need to delete any LigneVente records that reference this product
+      await tx.ligneVente.deleteMany({
+        where: { produitId: numericId }
+      });
+      
+      // Finally, delete the product itself
+      return tx.produit.delete({
+        where: { id: numericId }
+      });
+    });
+  }
 };
 
-module.exports = ProduitDAO;
+export default ProduitDAO;

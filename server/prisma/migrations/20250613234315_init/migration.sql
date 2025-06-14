@@ -28,19 +28,20 @@ CREATE TABLE "Stock" (
 );
 
 -- CreateTable
-CREATE TABLE "Client" (
+CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "nom" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
+    "password" TEXT NOT NULL DEFAULT 'password',
 
-    CONSTRAINT "Client_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Vente" (
     "id" SERIAL NOT NULL,
     "magasinId" INTEGER NOT NULL,
-    "clientId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
     "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "total" DOUBLE PRECISION NOT NULL,
 
@@ -74,7 +75,7 @@ CREATE TABLE "Restock" (
 CREATE UNIQUE INDEX "Stock_magasinId_produitId_key" ON "Stock"("magasinId", "produitId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Client_email_key" ON "Client"("email");
+CREATE UNIQUE INDEX "User_nom_key" ON "User"("nom");
 
 -- AddForeignKey
 ALTER TABLE "Stock" ADD CONSTRAINT "Stock_magasinId_fkey" FOREIGN KEY ("magasinId") REFERENCES "Magasin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -86,7 +87,7 @@ ALTER TABLE "Stock" ADD CONSTRAINT "Stock_produitId_fkey" FOREIGN KEY ("produitI
 ALTER TABLE "Vente" ADD CONSTRAINT "Vente_magasinId_fkey" FOREIGN KEY ("magasinId") REFERENCES "Magasin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Vente" ADD CONSTRAINT "Vente_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Vente" ADD CONSTRAINT "Vente_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "LigneVente" ADD CONSTRAINT "LigneVente_venteId_fkey" FOREIGN KEY ("venteId") REFERENCES "Vente"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

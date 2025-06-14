@@ -1,3 +1,12 @@
+/**
+ * Product Card Component
+ * 
+ * This component displays a single product in a card format.
+ * It adapts its functionality based on the user's role:
+ * - For clients: Shows add to cart button and store-specific stock
+ * - For gestionnaires: Shows edit, delete buttons and total stock across all stores
+ */
+
 import React from "react";
 import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
@@ -15,15 +24,29 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 
 const ProductCard = ({ produit, onEdit, onDelete }) => {
+  // State for hover effects
   const [hover, setHover] = React.useState(false);
   const { addToCart } = useCart();
   const { user } = useUser();
+  
+  // Calculate total stock across all stores (for gestionnaire)
   const totalStock = produit.stocks
     ? produit.stocks.reduce((sum, s) => sum + s.quantite, 0)
     : 0;
+    
+  // Get stock for the current store (for client)
+  const currentStoreStock = produit.stocks
+    ? produit.stocks.find(s => s.magasinId === user?.magasinId)?.quantite || 0
+    : 0;
+    
+  // Determine which stock value to display based on user role
+  const displayStock = user?.role === "gestionnaire" ? totalStock : currentStoreStock;
+  const stockLabel = user?.role === "gestionnaire" ? "Stock total" : "Stock disponible";
 
+  // Check if user is a client for conditional rendering
   const isClient = user?.role === "client";
 
   return (
@@ -46,26 +69,37 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
       onMouseLeave={() => setHover(false)}
       className="product-card"
     >
-      {/* ... (rest image placeholder, titres, etc) */}
+      {/* Card content with product details */}
       <CardContent sx={{ pb: 1 }}>
+        {/* Product name and price header */}
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
             {produit.nom}
           </Typography>
           <Typography variant="h6">${produit.prix.toFixed(2)}</Typography>
         </Box>
+        
+        {/* Stock availability information */}
         <Typography
           variant="body2"
-          sx={{ color: "#3577d6", mt: 0.5, fontWeight: 500 }}
+          sx={{ 
+            color: displayStock > 0 ? "#3577d6" : "#d32f2f", 
+            mt: 0.5, 
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center'
+          }}
         >
-          Stock total&nbsp;: <b>{totalStock}</b>
+          {isClient && <StorefrontIcon fontSize="small" sx={{ mr: 0.5, opacity: 0.7 }} />}
+          {stockLabel}&nbsp;: <b>{displayStock}</b>
         </Typography>
       </CardContent>
 
       <CardActions sx={{ justifyContent: "space-between", pt: 0 }}>
-        {/* Gestionnaire: icons édition/suppression */}
+        {/* Admin actions: Edit and Delete buttons (only shown for gestionnaire role) */}
         <Fade in={hover && (!!onEdit || !!onDelete)}>
           <Box>
+            {/* Edit button */}
             {onEdit && (
               <Tooltip title="Modifier" placement="top" arrow>
                 <IconButton
@@ -80,6 +114,8 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
                 </IconButton>
               </Tooltip>
             )}
+            
+            {/* Delete button */}
             {onDelete && (
               <Tooltip title="Supprimer" placement="top" arrow>
                 <IconButton
@@ -96,16 +132,17 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
             )}
           </Box>
         </Fade>
-        {/* Client: bouton ajouter au panier */}
+        
+        {/* Client action: Add to cart button (only shown for client role) */}
         {isClient && (
           <Box sx={{ width: "100%" }}>
             <Button
               variant="contained"
               startIcon={<AddShoppingCartIcon />}
               onClick={() => addToCart(produit)}
-              disabled={totalStock === 0}
+              disabled={currentStoreStock === 0}
               sx={{
-                backgroundColor: totalStock === 0 ? "#bdbdbd" : "#208aff",
+                backgroundColor: currentStoreStock === 0 ? "#bdbdbd" : "#208aff",
                 color: "#fff",
                 borderRadius: 2,
                 fontWeight: 700,
@@ -116,7 +153,7 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
               }}
               fullWidth
             >
-              {totalStock === 0 ? "Out of stock" : "Ajouter au panier"}
+              {currentStoreStock === 0 ? "Indisponible" : "Ajouter au panier"}
             </Button>
           </Box>
         )}

@@ -12,15 +12,26 @@ node "Docker Host" {
   }
   node "log430-server" {
     [Node.js Express API]
+    [Controllers]
+    [Routes]
     [Prisma Client]
   }
   node "magasin-db" {
-    database "PostgreSQL" as DB
+    database "PostgreSQL" as DB {
+      [User]
+      [Produit]
+      [Magasin]
+      [Stock]
+      [Vente]
+      [LigneVente]
+    }
   }
 }
 
 [React Vite App] -down-> [Nginx Static Server] : build
 [React Vite App] --> [Node.js Express API] : REST API (fetch)
-[Node.js Express API] --> [Prisma Client]
+[Node.js Express API] --> [Controllers]
+[Controllers] --> [Routes]
+[Controllers] --> [Prisma Client]
 [Prisma Client] --> DB
 @enduml

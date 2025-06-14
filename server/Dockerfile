@@ -12,7 +12,7 @@ COPY . .
 # Génère le client Prisma (obligatoire)
 RUN npx prisma generate
 
-EXPOSE 3800
+EXPOSE 3000
 
 # Ajoute la migration automatique au démarrage :
 CMD npx prisma migrate deploy && npm start

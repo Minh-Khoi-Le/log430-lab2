@@ -93,7 +93,7 @@
 
 - **Docker Compose**
   - Services : client, server, db
-  - Ports : 3800 (API), 5173 (client), 5432 (db)
+  - Ports : 3000 (API), 5173 (client), 5432 (db)
 
 ![Deploiement](<svg/Diagramme de deploiement.svg>)
 

@@ -1,13 +1,29 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+/**
+ * MaisonMere Routes
+ * 
+ * Base path: /api/v1/maisonmere
+ */
 
-const express = require("express");
-const ProduitDAO = require("../dao/produit.dao");
-const MagasinDAO = require("../dao/magasin.dao");
+import express from 'express';
+import { PrismaClient } from '@prisma/client';
+import ProduitDAO from '../dao/produit.dao.js';
+import MagasinDAO from '../dao/magasin.dao.js';
+import * as controller from '../controllers/maisonmere.controller.js';
+
+const prisma = new PrismaClient();
 const router = express.Router();
 
-// CRUD PRODUITS
-// Récupérer tous les produits
+
+//PRODUCT MANAGEMENT ROUTES
+/**
+ * GET /api/v1/maisonmere/produits
+ * 
+ * Get all products in the catalog
+ * 
+ * Used by:
+ * - Parent company product management interfaces
+ * - Catalog management dashboards
+ */
 router.get("/produits", async (req, res) => {
   try {
     const produits = await ProduitDAO.getAll();
@@ -19,7 +35,18 @@ router.get("/produits", async (req, res) => {
   }
 });
 
-// Récupérer un produit par ID
+/**
+ * GET /api/v1/maisonmere/produits/:id
+ * 
+ * Get detailed information about a specific product
+ * 
+ * Path parameters:
+ * - id: Product ID
+ * 
+ * Used by:
+ * - Product detail pages in parent company interfaces
+ * - Product editing forms
+ */
 router.get("/produits/:id", async (req, res) => {
   try {
     const produit = await ProduitDAO.getById(req.params.id);
@@ -32,15 +59,58 @@ router.get("/produits/:id", async (req, res) => {
   }
 });
 
-// Créer un nouveau produit
+/**
+ * POST /api/v1/maisonmere/produits
+ * 
+ * Create a new product in the catalog
+ * 
+ * Request body:
+ * - nom: Product name
+ * - prix: Product price
+ * - stock: Initial stock level
+ * 
+ * Used by:
+ * - Admin product list page
+ * - New product creation forms
+ */
 router.post("/produits", async (req, res) => {
   try {
     const { nom, prix, stock } = req.body;
-    const nouveau = await ProduitDAO.create({
+    
+    // Create the product first
+    const productData = {
       nom,
-      prix: parseFloat(prix),
-      stock: parseInt(stock),
+      prix: parseFloat(prix)
+    };
+    
+    // Use a transaction to create the product and set initial stock levels
+    const nouveau = await prisma.$transaction(async (tx) => {
+      // Create the product
+      const product = await tx.produit.create({ data: productData });
+      
+      // Get all stores
+      const stores = await tx.magasin.findMany();
+      
+      // Create stock entries for each store
+      // Use the provided stock value or default to 0
+      const stockValue = stock !== undefined ? parseInt(stock) : 0;
+      for (const store of stores) {
+        await tx.stock.create({
+          data: {
+            produitId: product.id,
+            magasinId: store.id,
+            quantite: stockValue
+          }
+        });
+      }
+      
+      // Return the product with stock information
+      return tx.produit.findUnique({
+        where: { id: product.id },
+        include: { stocks: true }
+      });
     });
+    
     res.status(201).json(nouveau);
   } catch (err) {
     res
@@ -52,7 +122,23 @@ router.post("/produits", async (req, res) => {
   }
 });
 
-// Modifier un produit
+/**
+ * PUT /api/v1/maisonmere/produits/:id
+ * 
+ * Update an existing product in the catalog
+ * 
+ * Path parameters:
+ * - id: Product ID
+ * 
+ * Request body:
+ * - nom: Product name (optional)
+ * - prix: Product price (optional)
+ * - stock: Stock level (optional)
+ * 
+ * Used by:
+ * - Admin product list page 
+ * - Product editing forms
+ */
 router.put("/produits/:id", async (req, res) => {
   try {
     const { nom, prix, stock } = req.body;
@@ -72,7 +158,18 @@ router.put("/produits/:id", async (req, res) => {
   }
 });
 
-// Supprimer un produit
+/**
+ * DELETE /api/v1/maisonmere/produits/:id
+ * 
+ * Remove a product from the catalog
+ * 
+ * Path parameters:
+ * - id: Product ID
+ * 
+ * Used by:
+ * - Admin product list page
+ * - Product discontinuation workflows
+ */
 router.delete("/produits/:id", async (req, res) => {
   try {
     await ProduitDAO.delete(req.params.id);
@@ -82,11 +179,24 @@ router.delete("/produits/:id", async (req, res) => {
   }
 });
 
-// CRUD MAGASINS
+//STORE MANAGEMENT ROUTES (To be implemented)
+/**
+ * POST /api/v1/maisonmere/magasins
+ * 
+ * Create a new store
+ * 
+ * Request body:
+ * - nom: Store name
+ * - adresse: Store address
+ * 
+ * Used by:
+ * - Admin dashboard for store management
+ * - Store network expansion workflows
+ */
 router.post("/magasins", async (req, res) => {
   try {
     const { nom, adresse } = req.body;
-    const magasin = await MagasinDAO.create({ nom, adresse });
+    const magasin = await MagasinDAO.createWithDefaultStock({ nom, adresse });
     res.status(201).json(magasin);
   } catch (err) {
     res
@@ -97,6 +207,23 @@ router.post("/magasins", async (req, res) => {
       });
   }
 });
+
+/**
+ * PUT /api/v1/maisonmere/magasins/:id
+ * 
+ * Update an existing store
+ * 
+ * Path parameters:
+ * - id: Store ID
+ * 
+ * Request body:
+ * - nom: Store name (optional)
+ * - adresse: Store address (optional)
+ * 
+ * Used by:
+ * - Admin dashboard for store management
+ * - Store information update workflows
+ */
 router.put("/magasins/:id", async (req, res) => {
   try {
     const { nom, adresse } = req.body;
@@ -111,6 +238,19 @@ router.put("/magasins/:id", async (req, res) => {
       });
   }
 });
+
+/**
+ * DELETE /api/v1/maisonmere/magasins/:id
+ * 
+ * Remove a store from the network
+ * 
+ * Path parameters:
+ * - id: Store ID
+ * 
+ * Used by:
+ * - Admin dashboard for store management
+ * - Store closure workflows
+ */
 router.delete("/magasins/:id", async (req, res) => {
   try {
     await MagasinDAO.delete(req.params.id);
@@ -120,45 +260,36 @@ router.delete("/magasins/:id", async (req, res) => {
   }
 });
 
-router.get("/stats", async (req, res) => {
-  try {
-    // Récupérer tous les magasins
-    const magasins = await prisma.magasin.findMany();
 
-    // Pour chaque magasin, calculer les stats
-    const stats = await Promise.all(
-      magasins.map(async (magasin) => {
-        // Toutes les ventes de ce magasin
-        const ventes = await prisma.vente.findMany({
-          where: { magasinId: magasin.id },
-          include: { lignes: true },
-        });
 
-        // Calcul du chiffre d’affaires et produits vendus
-        let chiffreAffaires = 0;
-        let produitsVendus = 0;
-        ventes.forEach((vente) => {
-          vente.lignes.forEach((ligne) => {
-            chiffreAffaires += ligne.prixUnitaire * ligne.quantite;
-            produitsVendus += ligne.quantite;
-          });
-        });
+//REPORTING ROUTES
+/**
+ * GET /api/v1/maisonmere/stats
+ * 
+ * Get performance statistics for all stores
+ * 
+ * Returns:
+ * - Sales totals
+ * - Revenue figures
+ * - Products sold
+ * 
+ * Used by:
+ * - Admin dashboard
+ */
+router.get('/stats', controller.stats);
 
-        // Retourner les stats pour ce magasin
-        return {
-          id: magasin.id,
-          nom: magasin.nom,
-          ventesTotal: ventes.length,
-          produitsVendus,
-          chiffreAffaires,
-        };
-      })
-    );
+/**
+ * GET /api/v1/maisonmere/ventes-consolidees
+ * 
+ * Get consolidated sales data across all stores
+ * 
+ * Query parameters:
+ * - debut: Start date for filtering 
+ * - fin: End date for filtering 
+ * 
+ * Used by:
+ * - Admin dashboard
+ */
+router.get('/ventes-consolidees', controller.ventesConsolidees);
 
-    res.json(stats);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Erreur lors du calcul des stats" });
-  }
-});
-module.exports = router;
+export default router;

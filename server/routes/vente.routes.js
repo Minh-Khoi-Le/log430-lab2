@@ -1,67 +1,82 @@
-const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+/**
+ * Vente Routes
+ * 
+ * 
+ * Base path: /api/v1/sales
+ * 
+ * These routes are used by:
+ * - Point of sale (POS) interfaces to create new sales
+ * - Reporting page in Dashboard
+ */
+
+import express from 'express';
+import * as controller from '../controllers/vente.controller.js';
+
 const router = express.Router();
 
-router.post('/', async (req, res) => {
-  const { clientNom, magasinId, panier } = req.body; // [{ produitId, quantite, prix }]
+/**
+ * GET /api/v1/sales
+ * 
+ * List all sales with client and store information
+ * 
+ * Used by:
+ * - Admin dashboards
+ */
+router.get('/', controller.list);
 
-  console.log("POST vente body :", req.body);
-  try {
-    // Vérifie stock pour chaque produit AVANT d’aller plus loin (et récupère le nom si erreur)
-    for (const item of panier) {
-      const stock = await prisma.stock.findFirst({
-        where: { produitId: item.produitId, magasinId },
-        include: { produit: true },
-      });
-      if (!stock || stock.quantite < item.quantite) {
-        return res.status(400).json({
-          error: `Produit "${stock?.produit?.nom || item.produitId}" out of stock ou stock insuffisant!`,
-        });
-      }
-    }
+/**
+ * POST /api/v1/sales
+ * 
+ * Create a new sale transaction
+ * 
+ * Request body:
+ * - magasinId: Store ID where the sale occurred
+ * - clientId: Client ID (optional if clientNom is provided)
+ * - clientNom: Client name (optional if clientId is provided)
+ * - lignes: Array of sale line items with product ID, quantity, and unit price
+ * - panier: Alternative format for sale items (backwards compatibility)
+ * 
+ * The endpoint handles:
+ * - Client creation if only name is provided
+ * - Stock availability verification
+ * - Stock quantity updates
+ * - Transaction consistency
+ * 
+ * Used by:
+ * - Point of sale (POS) interfaces
+ * - Online store checkout process
+ */
+router.post('/', controller.create);
 
-    // Transaction : création client, vente, lignes, MAJ stock
-    const result = await prisma.$transaction(async (prisma) => {
-      // Crée/cherche le client
-      let client = await prisma.client.findFirst({ where: { nom: clientNom } });
-      if (!client) {
-        client = await prisma.client.create({ data: { nom: clientNom} });
-      }
+/**
+ * GET /api/v1/sales/client/:clientId
+ * 
+ * Get all sales for a specific client
+ * 
+ * Path parameters:
+ * - clientId: Client ID
+ * 
+ * Used by:
+ * 
+ * - Admin dashboard
+ */
+router.get('/client/:clientId', controller.byClient);
 
-      // Crée la vente
-      const vente = await prisma.vente.create({
-        data: {
-          magasinId,
-          clientId: client.id,
-          total: panier.reduce((s, i) => s + i.quantite * i.prix, 0),
-          lignes: {
-            create: panier.map(item => ({
-              produitId: item.produitId,
-              quantite: item.quantite,
-              prixUnitaire: item.prix,
-            })),
-          },
-        },
-        include: { lignes: true }
-      });
+/**
+ * GET /api/v1/sales/store/:storeId
+ * 
+ * Get sales for a specific store
+ * 
+ * Path parameters:
+ * - storeId: Store ID
+ * 
+ * Query parameters:
+ * - limit: Optional limit on number of sales to return
+ * 
+ * Used by:
+ * - Store detail pages
+ * - Admin dashboard
+ */
+router.get('/store/:storeId', controller.byStore);
 
-      // MAJ des stocks
-      for (const item of panier) {
-        await prisma.stock.updateMany({
-          where: { produitId: item.produitId, magasinId },
-          data: { quantite: { decrement: item.quantite } }
-        });
-      }
-
-      return vente;
-    });
-
-    res.json({ success: true, venteId: result.id });
-  } catch (err) { 
-    console.error("Erreur /ventes :", err); 
-    res.status(500).json({ error: "Erreur serveur lors de l'enregistrement de la vente." });
-  }
-});
-
-module.exports = router;
+export default router;

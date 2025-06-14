@@ -1,69 +1,180 @@
-# LOG430 - TP2 - Application de Gestion de Magasin
+# LOG430 - Application de Gestion de Magasin
 
 ## Description
 
-Cette application simule la gestion d’un magasin avec une interface web moderne.  
-L’architecture suit un modèle **2-Tiers** :  
+Cette application simule la gestion d'un magasin avec une interface web moderne :  
 
 - Un frontend React (Vite)
-- Un backend Node.js (Express, DAO, Prisma/SQLite)  
-Les deux services sont orchestrés avec **Docker Compose**.  
-Un pipeline **CI/CD** GitHub Actions automatise le build et les tests.
+- Un backend Node.js (Express, DAO, Prisma/PostgreSQL) avec API REST documentée  
+  Les deux services sont orchestrés avec **Docker Compose**.  
+  Un pipeline **CI/CD** GitHub Actions automatise le build et les tests.
 
 ---
 
-## Structure du projet
+## Choix techniques
 
-/client # Frontend React (Vite)
-/server # Backend Express + Prisma
-/server/dao # DAO produits
-/server/routes # Routes Express
-/server/prisma # Modèle de données Prisma (SQLite par défaut)
-docker-compose.yml # Orchestration frontend/backend
+Frontend : React / Vite / Material UI
+
+Backend : Express (Node.js 20)
+
+Persistance : Prisma ORM / PostgreSQL
+
+Conteneurisation : Docker Compose (client/server/db)
 
 ---
 
-## Instructions d’exécution
+## Instructions d'exécution
 
 ### 1. **Prérequis**
 
-- **Docker & Docker Compose** installés  
+- **Docker & Docker Compose** installés
 - (Facultatif) Node.js 18+ pour lancer localement hors Docker
 
 ---
 
-### 2. **Lancer l’application complète (Docker)**
+### 2. **Lancer l'application complète**
+
+Avec Docker :
 
 ```bash
 docker-compose up --build
 ```
 
-## Injection de données de test
-
-Pour injecter 10 produits automatiquement :
+En local :
 
 ```bash
+# Pour lancer le server
+cd server
+npm run start
+```
+
+```bash
+# Pour lancer l'application web
+cd client
+npm run dev
+```
+
+## Injection de données par défaut
+
+Pour avoir des données par défaut :
+
+```bash
+# Avec Docker
 docker-compose exec server npm run seed
-ou
+
+# Localement
+cd server
 npm run seed
 ```
 
-## Utilisation (fonctionnalités)
+## Lancer les tests
 
-Liste, recherche, ajout, modification et suppression de produits (CRUD)
+Tester localement :
 
-Interface réactive (recherche instantanée, popups de confirmation/édition)
+```bash
+cd server
+npm test
+```
 
-Architecture DAO claire côté backend
+## Commandes Prisma utiles
 
-Modales personnalisées (confirmation, édition)
+Pour réinitialiser migration prisma :
 
-## Choix techniques
+```bash
+npx prisma migrate reset
+npx prisma migrate dev --name init
+```
 
-Frontend : React / Vite
+Il faut reseed les données après (à voir plus haut).
 
-Backend : Express (Node.js 20)
+## Récupérer l'arborescence du projet
 
-Persistance : Prisma ORM / SQLite
+Exécuter sur le root du projet
 
-Conteneurisation : Docker Compose (client/server)
+```bash
+treee -l 4 --ignore "node_modules,.git" -o docs\structure.txt
+```
+
+## Arborescene
+
+├── client
+│ ├── Dockerfile
+│ ├── eslint.config.js
+│ ├── index.html
+│ ├── package-lock.json
+│ ├── package.json
+│ ├── public
+│ ├── src
+│ │ ├── api
+│ │ │ └── index.js
+│ │ ├── App.jsx
+│ │ ├── assets
+│ │ │ ├── index.css
+│ │ │ └── react.svg
+│ │ ├── components
+│ │ │ ├── Modal.jsx
+│ │ │ ├── Navbar.jsx
+│ │ │ ├── ProductCard.jsx
+│ │ │ ├── ProductEditForm.jsx
+│ │ │ └── ProductList.jsx
+│ │ ├── context
+│ │ │ ├── CartContext.jsx
+│ │ │ └── UserContext.jsx
+│ │ ├── main.jsx
+│ │ └── pages
+│ │ ├── CartPage.jsx
+│ │ ├── Dashboard.jsx
+│ │ ├── Login.jsx
+│ │ ├── MagasinDetail.jsx
+│ │ └── Products.jsx
+│ └── vite.config.js
+├── docker-compose.yml
+├── package-lock.json
+├── package.json
+├── README.md
+└── server
+├── controllers
+│ ├── magasin.controller.js
+│ ├── maisonmere.controller.js
+│ ├── product.controller.js
+│ ├── stock.controller.js
+│ ├── user.controller.js
+│ └── vente.controller.js
+├── dao
+│ ├── magasin.dao.js
+│ ├── produit.dao.js
+│ ├── stock.dao.js
+│ ├── user.dao.js
+│ └── vente.dao.js
+├── Dockerfile
+├── docs
+│ └── magasinapi.yaml
+├── index.js
+├── jest.config.js
+├── middleware
+│ ├── auth.js
+│ ├── errorHandler.js
+│ └── validateRequest.js
+├── package-lock.json
+├── package.json
+├── prisma
+│ └── schema.prisma
+├── routes
+│ ├── magasin.routes.js
+│ ├── maisonmere.routes.js
+│ ├── product.routes.js
+│ ├── stock.routes.js
+│ ├── user.routes.js
+│ └── vente.routes.js
+├── seed.js
+├── server.js
+├── services
+│ └── product.service.js
+└── tests
+├── auth.test.js
+├── basic.test.js
+├── magasin.test.js
+├── product.test.js
+├── setup.js
+├── stock.test.js
+└── ventes.test.js

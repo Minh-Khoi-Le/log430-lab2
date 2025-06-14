@@ -1,20 +1,39 @@
+/**
+ * Cart Page
+ * 
+ * This component displays the shopping cart and handles the checkout process.
+ * It's only accessible to users with the client role.
+ * 
+ */
+
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
+import Modal from "../components/Modal";
 
 const CartPage = () => {
   const { cart, removeFromCart, clearCart } = useCart();
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptData, setReceiptData] = useState(null);
+  
+  // Calculate total price of all items in cart
   const total = cart.reduce((sum, item) => sum + item.produit.prix * item.quantite, 0);
 
-  // Confirmer l'achat : POST /ventes
+  /**
+   * Handle checkout process
+   * 
+   * Submits the cart contents to the backend to create a new sale.
+   * Updates UI state during the process and handles success/failure.
+   */
   const handleCheckout = async () => {
     setErrorMsg("");
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3800/ventes", {
+      // Send cart data to backend API
+      const res = await fetch("http://localhost:3000/api/v1/sales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -30,11 +49,18 @@ const CartPage = () => {
       const data = await res.json();
       setLoading(false);
 
+      // Handle API response
       if (data.success) {
+        // Save receipt data and show the receipt modal
+        setReceiptData({
+          date: new Date().toLocaleString(),
+          items: [...cart],
+          total: total,
+          venteId: data.vente.id
+        });
+        setShowReceipt(true);
         clearCart();
-        alert("Achat confirmé !");
         setErrorMsg("");
-        window.location.reload(); 
       } else if (data.error) {
         setErrorMsg(data.error);
       }
@@ -43,6 +69,14 @@ const CartPage = () => {
       setErrorMsg("Erreur réseau ou serveur.");
       setLoading(false);
     }
+  };
+
+  /**
+   * Close receipt modal and redirect to home
+   */
+  const handleCloseReceipt = () => {
+    setShowReceipt(false);
+    window.location.href = "/";
   };
 
   return (
@@ -57,6 +91,7 @@ const CartPage = () => {
         fontFamily: "Inter, Arial, sans-serif",
       }}
     >
+      {/* Cart title */}
       <h2
         style={{
           fontWeight: 700,
@@ -66,10 +101,13 @@ const CartPage = () => {
           color: "#223"
         }}
       >Votre panier</h2>
+      
+      {/* Empty cart message */}
       {cart.length === 0 ? (
         <div style={{ textAlign: "center", color: "#888", fontSize: 20, marginTop: 30 }}>Le panier est vide.</div>
       ) : (
         <>
+          {/* Cart item list */}
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {cart.map((item) => (
               <li
@@ -86,6 +124,7 @@ const CartPage = () => {
                   fontWeight: 500,
                 }}
               >
+                {/* Item details */}
                 <span>
                   <span style={{ fontWeight: 700 }}>{item.produit.nom}</span>
                   &nbsp;x {item.quantite}
@@ -93,6 +132,8 @@ const CartPage = () => {
                     &nbsp;-&nbsp;${item.produit.prix.toFixed(2)}
                   </span>
                 </span>
+                
+                {/* Remove item button */}
                 <button
                   style={{
                     padding: "7px 17px",
@@ -133,6 +174,8 @@ const CartPage = () => {
               </li>
             ))}
           </ul>
+          
+          {/* Cart total */}
           <div
             style={{
               fontWeight: 700,
@@ -145,9 +188,13 @@ const CartPage = () => {
           >
             Total : <span style={{ color: "#376dff" }}>${total.toFixed(2)}</span>
           </div>
+          
+          {/* Error message display */}
           {errorMsg && (
             <div style={{ color: "#f44336", fontWeight: 600, marginBottom: 14 }}>{errorMsg}</div>
           )}
+          
+          {/* Checkout button */}
           <button
             style={{
               margin: "24px auto 0 auto",
@@ -173,6 +220,73 @@ const CartPage = () => {
           </button>
         </>
       )}
+
+      {/* Receipt Modal */}
+      <Modal 
+        open={showReceipt} 
+        title="Reçu d'achat" 
+        onClose={handleCloseReceipt}
+      >
+        {receiptData && (
+          <div style={{ padding: "0 10px" }}>
+            <div style={{ textAlign: "center", margin: "15px 0", color: "#376dff" }}>
+              <h3 style={{ margin: "5px 0" }}>Merci pour votre achat!</h3>
+              <p style={{ fontSize: "14px", color: "#555" }}>
+                Transaction #{receiptData.venteId} • {receiptData.date}
+              </p>
+            </div>
+
+            <div style={{ 
+              borderTop: "1px dashed #ccc", 
+              borderBottom: "1px dashed #ccc",
+              padding: "15px 0",
+              margin: "15px 0"
+            }}>
+              {receiptData.items.map((item) => (
+                <div key={item.produit.id} style={{ 
+                  display: "flex", 
+                  justifyContent: "space-between",
+                  margin: "8px 0",
+                  fontSize: "15px"
+                }}>
+                  <div>
+                    <span style={{ fontWeight: "bold" }}>{item.produit.nom}</span>
+                    <span style={{ color: "#666" }}> x{item.quantite}</span>
+                  </div>
+                  <div>${(item.produit.prix * item.quantite).toFixed(2)}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ 
+              display: "flex", 
+              justifyContent: "space-between",
+              fontWeight: "bold",
+              fontSize: "18px"
+            }}>
+              <div>Total</div>
+              <div>${receiptData.total.toFixed(2)}</div>
+            </div>
+
+            <button 
+              onClick={handleCloseReceipt}
+              style={{
+                width: "100%",
+                padding: "12px",
+                margin: "20px 0 10px 0",
+                background: "#376dff",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontWeight: "bold",
+                cursor: "pointer"
+              }}
+            >
+              Fermer
+            </button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
