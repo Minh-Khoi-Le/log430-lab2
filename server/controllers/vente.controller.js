@@ -4,15 +4,7 @@ const prisma = new PrismaClient();
 
 /**
  * Create Sale Controller
- * 
  * Creates a new sale transaction with the provided data.
- * This is a complex operation that handles:
- * 1. User identification or creation
- * 2. Input format normalization
- * 3. Stock availability verification
- * 4. Transaction creation
- * 5. Inventory update
- * 
  * @param {Request} req - Express request object with sale data in body
  * @param {Response} res - Express response object
  * @param {Function} next - Express next middleware function

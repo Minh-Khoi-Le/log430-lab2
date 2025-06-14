@@ -1,4 +1,3 @@
-D:\ETS\log430\lab\log430-lab2
 ├── client
 |  ├── Dockerfile
 |  ├── eslint.config.js
@@ -18,7 +17,7 @@ D:\ETS\log430\lab\log430-lab2
 |  |  |  ├── Navbar.jsx
 |  |  |  ├── ProductCard.jsx
 |  |  |  ├── ProductEditForm.jsx
-|  |  |  ├── ProductList.jsx
+|  |  |  └── ProductList.jsx
 |  |  ├── context
 |  |  |  ├── CartContext.jsx
 |  |  |  └── UserContext.jsx
@@ -27,67 +26,56 @@ D:\ETS\log430\lab\log430-lab2
 |  |     ├── CartPage.jsx
 |  |     ├── Dashboard.jsx
 |  |     ├── Login.jsx
+|  |     ├── MagasinDetail.jsx
 |  |     └── Products.jsx
 |  └── vite.config.js
 ├── docker-compose.yml
-├── docs
-|  ├── instructions.md
-|  ├── Rapport d'architecture.md
-|  ├── structure.txt
-|  ├── svg
-|  |  ├── Diagramme CU.svg
-|  |  ├── Diagramme de classes.svg
-|  |  ├── Diagramme de deploiement.svg
-|  |  ├── MDD.svg
-|  |  └── RDCU Vente.svg
-|  └── UML
-|     ├── diagramme-classe.puml
-|     ├── diagramme-CU.puml
-|     ├── diagramme-deploiement.puml
-|     ├── MDD.puml
-|     └── RDCU-Vente.puml
 ├── package-lock.json
 ├── package.json
 ├── README.md
 └── server
    ├── controllers
-   |  ├── client.controller.js
    |  ├── magasin.controller.js
    |  ├── maisonmere.controller.js
    |  ├── product.controller.js
+   |  ├── stock.controller.js
+   |  ├── user.controller.js
    |  └── vente.controller.js
    ├── dao
-   |  ├── client.dao.js
    |  ├── magasin.dao.js
    |  ├── produit.dao.js
-   |  ├── restock.dao.js
    |  ├── stock.dao.js
+   |  ├── user.dao.js
    |  └── vente.dao.js
    ├── Dockerfile
    ├── docs
-   |  └── openapi.yaml
+   |  └── magasinapi.yaml
    ├── index.js
    ├── jest.config.js
    ├── middleware
    |  ├── auth.js
    |  ├── errorHandler.js
    |  └── validateRequest.js
-   ├── mock.stats.json
    ├── package-lock.json
    ├── package.json
    ├── prisma
-   |  ├── migrations
    |  └── schema.prisma
    ├── routes
-   |  ├── client.routes.js
    |  ├── magasin.routes.js
    |  ├── maisonmere.routes.js
    |  ├── product.routes.js
-   |  ├── produit.routes.js
+   |  ├── stock.routes.js
+   |  ├── user.routes.js
    |  └── vente.routes.js
    ├── seed.js
    ├── server.js
    ├── services
    |  └── product.service.js
    └── tests
-      └── api.test.js
+      ├── auth.test.js
+      ├── basic.test.js
+      ├── magasin.test.js
+      ├── product.test.js
+      ├── setup.js
+      ├── stock.test.js
+      └── ventes.test.js

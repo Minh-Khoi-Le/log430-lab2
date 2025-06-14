@@ -9,7 +9,7 @@ const StockDAO = {
    * Includes detailed product information for each stock record.
    * 
    * This function is used to:
-   * - Display current inventory levels in store management interfaces
+   * - Display current inventory levels in Dashboard
    * - Check product availability for sales
    * - Identify products that need restocking
    * 

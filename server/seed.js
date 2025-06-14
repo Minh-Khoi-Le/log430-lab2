@@ -35,7 +35,7 @@ function getRandomInt(min, max) {
 }
 
 async function main() {
-  // Vider les tables dans l'ordre pour respecter les contraintes de clés étrangères
+  // Delete all data in the database
   await prisma.ligneVente?.deleteMany?.();
   await prisma.vente?.deleteMany?.();
   await prisma.stock?.deleteMany?.();
@@ -44,17 +44,17 @@ async function main() {
   await prisma.produit.deleteMany({});
   await prisma.user?.deleteMany?.();
 
-  // Insérer produits, magasins et users
+  // Insert products, stores and users
   await prisma.produit.createMany({ data: produits });
   await prisma.magasin.createMany({ data: magasins });
   await prisma.user.createMany({ data: users });
 
-  // On récupère les produits, magasins et users insérés
+  // Get the products, stores and users inserted
   const produitsList = await prisma.produit.findMany();
   const magasinsList = await prisma.magasin.findMany();
   const clientsList = await prisma.user.findMany({ where: { role: 'client' } });
 
-  // Création des stocks pour chaque produit X magasin
+  // Create stocks for each product X store
   for (const magasin of magasinsList) {
     for (const produit of produitsList) {
       await prisma.stock.create({
@@ -67,28 +67,28 @@ async function main() {
     }
   }
 
-  // Génération de ventes aléatoires pour chaque magasin
+  // Generate random sales for each store
   for (const magasin of magasinsList) {
-    const nbVentes = getRandomInt(5, 10); // 5 à 10 ventes par magasin
+    const nbVentes = getRandomInt(5, 10); // 5 to 10 sales per store
     for (let v = 0; v < nbVentes; v++) {
-      // Client au hasard parmi les utilisateurs de rôle 'client'
+      // Random client among the users with role 'client'
       const client = clientsList[getRandomInt(0, clientsList.length - 1)];
-      // 1 à 4 produits différents par vente
+      // 1 to 4 different products per sale
       const produitsChoisis = [...produitsList]
         .sort(() => Math.random() - 0.5)
         .slice(0, getRandomInt(1, 4));
 
-      // Générer lignes de vente
+      // Generate sale lines
       const lignes = produitsChoisis.map(produit => ({
         produitId: produit.id,
         quantite: getRandomInt(1, 5),
         prixUnitaire: produit.prix
       }));
 
-      // Calcule le total de la vente
+      // Calculate the total of the sale
       const total = lignes.reduce((acc, l) => acc + l.quantite * l.prixUnitaire, 0);
 
-      // Crée la vente avec ses lignes associées
+      // Create the sale with its associated lines
       await prisma.vente.create({
         data: {
           magasinId: magasin.id,

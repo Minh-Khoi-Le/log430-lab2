@@ -7,7 +7,6 @@
  * These routes are used by:
  * - Store management interfaces to manage store information
  * - Inventory management interfaces to view and manage store stock
- * - Store managers to request product restocks from the parent company (incoming)
  */
 
 import express from 'express';
@@ -21,8 +20,7 @@ const router = express.Router();
  * List all stores
  * 
  * Used by:
- * - Admin interfaces to view all stores
- * - Parent company (maisonmere) to monitor all stores
+ * - Admin Dashboard to view all stores
  */
 router.get('/', controller.list);
 
@@ -50,15 +48,14 @@ router.get('/:id', controller.get);
  * - adresse: Store address (optional)
  * 
  * Used by:
- * - Admin interfaces for store management
- * - Parent company (maisonmere) to add new store locations
+ * - Admin dashboard for store management
  */
 router.post('/', controller.create);
 
 /**
  * PUT /api/v1/stores/:id
  * 
- * Update an existing store
+ * Update an existing store (To be implemented)
  * 
  * Path parameters:
  * - id: Store ID
@@ -68,7 +65,7 @@ router.post('/', controller.create);
  * - adresse: Store address (optional)
  * 
  * Used by:
- * - Admin interfaces for store management
+ * - Admin dashboard for store management
  * - Parent company (maisonmere) to update store information
  */
 router.put('/:id', controller.update);
@@ -76,7 +73,7 @@ router.put('/:id', controller.update);
 /**
  * DELETE /api/v1/stores/:id
  * 
- * Delete a store
+ * Delete a store (To be implemented)
  * 
  * Path parameters:
  * - id: Store ID
@@ -102,36 +99,5 @@ router.delete('/:id', controller.remove);
  */
 router.get('/:magasinId/stock', controller.stock);
 
-/**
- * GET /api/v1/stores/:magasinId/restock
- * 
- * Get restock requests for a specific store
- * 
- * Path parameters:
- * - magasinId: Store ID
- * 
- * Used by:
- * - Store managers to track pending restock requests
- * - Parent company to view restock requests from stores
- */
-router.get('/:magasinId/restock', controller.restockRequests);
-
-/**
- * POST /api/v1/stores/:magasinId/restock
- * 
- * Create a new restock request for a specific store
- * 
- * Path parameters:
- * - magasinId: Store ID
- * 
- * Request body:
- * - produitId: Product ID to restock
- * - quantite: Quantity requested
- * 
- * Used by:
- * - Store managers to request additional inventory
- * - Inventory management interfaces to automate restock requests
- */
-router.post('/:magasinId/restock', controller.createRestock);
 
 export default router;

@@ -82,7 +82,7 @@ const VenteDAO = {
    * Get All Sales
    * 
    * Retrieves all sales with user and store information.
-   * Used for sales reporting and analysis.
+   * Used for sales reporting in Dashboard
    * 
    * @returns {Promise<Array>} - Promise resolving to array of all sales
    */

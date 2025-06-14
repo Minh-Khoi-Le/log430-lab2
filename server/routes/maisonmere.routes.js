@@ -70,7 +70,7 @@ router.get("/produits/:id", async (req, res) => {
  * - stock: Initial stock level
  * 
  * Used by:
- * - Parent company product management interfaces
+ * - Admin product list page
  * - New product creation forms
  */
 router.post("/produits", async (req, res) => {
@@ -136,7 +136,7 @@ router.post("/produits", async (req, res) => {
  * - stock: Stock level (optional)
  * 
  * Used by:
- * - Parent company product management interfaces
+ * - Admin product list page 
  * - Product editing forms
  */
 router.put("/produits/:id", async (req, res) => {
@@ -167,7 +167,7 @@ router.put("/produits/:id", async (req, res) => {
  * - id: Product ID
  * 
  * Used by:
- * - Parent company product management interfaces
+ * - Admin product list page
  * - Product discontinuation workflows
  */
 router.delete("/produits/:id", async (req, res) => {
@@ -179,7 +179,7 @@ router.delete("/produits/:id", async (req, res) => {
   }
 });
 
-//STORE MANAGEMENT ROUTES
+//STORE MANAGEMENT ROUTES (To be implemented)
 /**
  * POST /api/v1/maisonmere/magasins
  * 
@@ -190,7 +190,7 @@ router.delete("/produits/:id", async (req, res) => {
  * - adresse: Store address
  * 
  * Used by:
- * - Parent company store management interfaces
+ * - Admin dashboard for store management
  * - Store network expansion workflows
  */
 router.post("/magasins", async (req, res) => {
@@ -221,7 +221,7 @@ router.post("/magasins", async (req, res) => {
  * - adresse: Store address (optional)
  * 
  * Used by:
- * - Parent company store management interfaces
+ * - Admin dashboard for store management
  * - Store information update workflows
  */
 router.put("/magasins/:id", async (req, res) => {
@@ -248,7 +248,7 @@ router.put("/magasins/:id", async (req, res) => {
  * - id: Store ID
  * 
  * Used by:
- * - Parent company store management interfaces
+ * - Admin dashboard for store management
  * - Store closure workflows
  */
 router.delete("/magasins/:id", async (req, res) => {
@@ -272,12 +272,9 @@ router.delete("/magasins/:id", async (req, res) => {
  * - Sales totals
  * - Revenue figures
  * - Products sold
- * - Performance metrics by store
  * 
  * Used by:
- * - Executive dashboards
- * - Performance monitoring tools
- * - Financial reporting interfaces
+ * - Admin dashboard
  */
 router.get('/stats', controller.stats);
 
@@ -287,13 +284,11 @@ router.get('/stats', controller.stats);
  * Get consolidated sales data across all stores
  * 
  * Query parameters:
- * - debut: Start date for filtering (optional)
- * - fin: End date for filtering (optional)
+ * - debut: Start date for filtering 
+ * - fin: End date for filtering 
  * 
  * Used by:
- * - Sales analysis tools
- * - Financial reporting interfaces
- * - Business intelligence dashboards
+ * - Admin dashboard
  */
 router.get('/ventes-consolidees', controller.ventesConsolidees);
 

@@ -272,30 +272,6 @@ paths:
         '200':
           description: OK
   
-  /stores/{magasinId}/restock:
-    get:
-      summary: Get restock requests for a store
-      parameters:
-        - name: magasinId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-    post:
-      summary: Create a restock request
-      parameters:
-        - name: magasinId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '201':
-          description: Created
-  
   # Sales routes
   /sales:
     get:
@@ -409,7 +385,7 @@ paths:
         '200':
           description: OK
   
-  # Maisonmere (parent company) routes
+  # Maisonmere routes
   /maisonmere/stats:
     get:
       summary: Get performance statistics for all stores

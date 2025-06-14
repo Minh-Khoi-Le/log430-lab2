@@ -11,8 +11,6 @@ class MaisonMere {
   +supprimerProduit(p: Produit)
   +genererRapportVentes()
   +visualiserDashboard()
-  +accepterRestock(demande: Restock)
-  +refuserRestock(demande: Restock)
 }
 
 class Magasin {
@@ -21,8 +19,6 @@ class Magasin {
   +adresse
   --
   +consulterStock()
-  +demanderRestock(p: Produit, qte: int)
-  +consulterEtatRestock(restock: Restock)
 }
 
 class Produit {
@@ -33,37 +29,49 @@ class Produit {
 }
 
 class Stock {
+  +id
+  +magasinId
+  +produitId
   +quantite
   --
   +verifierDisponibilite(qte: int)
 }
 
-class Restock {
+class User {
   +id
-  +date
-  +statut  // ("en attente", "acceptée", "refusée")
-  +quantite
+  +nom
+  +role
+  +password
   --
-  +consulterStatut()
+  +authentifier()
 }
 
 class Client {
-  +id
-  +nom
-  +email
   --
   +acheter(produits: List<Produit>, magasin: Magasin)
   +consulterAchats()
 }
 
+class Gestionnaire {
+  --
+  +gererProduits()
+  +consulterDashboard()
+}
+
 class Vente {
   +id
+  +magasinId
+  +userId
   +date
+  +total
   --
   +calculerTotal()
 }
 
 class LigneVente {
+  +id
+  +venteId
+  +produitId
   +quantite
   +prixUnitaire
   --
@@ -73,13 +81,12 @@ class LigneVente {
 '--- Relations principales ---
 MaisonMere "1" o-- "*" Magasin : supervise
 MaisonMere "1" o-- "*" Produit : gere
-MaisonMere "1" o-- "*" Restock : traite
 
 Magasin "1" o-- "*" Stock : possède
 Stock "*" o-- "1" Produit : concerne
 
-Magasin "1" o-- "*" Restock : envoie
-Restock "*" o-- "1" Produit : concerne
+User <|-- Client
+User <|-- Gestionnaire
 
 Client "1" o-- "*" Vente : effectue
 Magasin "1" o-- "*" Vente : effectue

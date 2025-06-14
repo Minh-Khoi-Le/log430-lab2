@@ -6,8 +6,7 @@
  * 
  * These routes are used by:
  * - Point of sale (POS) interfaces to create new sales
- * - Sales reporting interfaces to view sales history (incoming)
- * - Client management interfaces to view client purchase history (incoming)
+ * - Reporting page in Dashboard
  */
 
 import express from 'express';
@@ -21,9 +20,7 @@ const router = express.Router();
  * List all sales with client and store information
  * 
  * Used by:
- * - Sales reporting interfaces
  * - Admin dashboards
- * - Financial reporting tools
  */
 router.get('/', controller.list);
 
@@ -60,9 +57,8 @@ router.post('/', controller.create);
  * - clientId: Client ID
  * 
  * Used by:
- * - Client detail pages
- * - Customer history views
- * - Client loyalty programs
+ * 
+ * - Admin dashboard
  */
 router.get('/client/:clientId', controller.byClient);
 
@@ -79,8 +75,7 @@ router.get('/client/:clientId', controller.byClient);
  * 
  * Used by:
  * - Store detail pages
- * - Store management interfaces
- * - Sales analysis for a specific store
+ * - Admin dashboard
  */
 router.get('/store/:storeId', controller.byStore);
 

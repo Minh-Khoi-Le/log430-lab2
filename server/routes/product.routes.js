@@ -4,9 +4,9 @@
  * Base path: /api/v1/products
  * 
  * These routes are used by:
- * - Store management interfaces to view and manage product inventory
- * - Parent company (maisonmere) to manage the product catalog
- * - Sales interfaces to retrieve product information for sales transactions
+ * - Admin product list page
+ * - Admin product creation form
+ * - Admin product edit form
  */
 
 import express from 'express';
@@ -58,7 +58,6 @@ router.get('/:id',
  * 
  * Used by:
  * - Admin interfaces for product catalog management
- * - Parent company (maisonmere) to add new products to the catalog
  */
 router.post('/',
   auth,
@@ -76,7 +75,6 @@ router.post('/',
  * 
  * Used by:
  * - Admin interfaces for product catalog management
- * - Parent company (maisonmere) to update product information
  */
 router.put('/:id',
   auth,
@@ -94,7 +92,6 @@ router.put('/:id',
  * Delete a product
  * Used by:
  * - Admin interfaces for product catalog management
- * - Parent company (maisonmere) to remove discontinued products
  */
 router.delete('/:id',
   auth,

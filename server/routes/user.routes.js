@@ -4,9 +4,7 @@
  * Base path: /api/v1/users
  * 
  * These routes are used by:
- * - User management interfaces
  * - Authentication/login
- * - Sales interfaces for customer lookup (incoming)
  */
 
 import express from 'express';
@@ -25,7 +23,6 @@ const router = express.Router();
  * 
  * Used by:
  * - Login page
- * - Authentication interfaces
  */
 router.post('/login', controller.login);
 
@@ -34,10 +31,6 @@ router.post('/login', controller.login);
  * 
  * List all users
  * 
- * Used by:
- * - User management interfaces
- * - Sales interfaces for customer selection
- * - Admin dashboards
  */
 router.get('/', controller.list);
 
@@ -49,9 +42,6 @@ router.get('/', controller.list);
  * Path parameters:
  * - id: User ID
  * 
- * Used by:
- * - User detail pages
- * - Profile interfaces
  */
 router.get('/:id', controller.get);
 
@@ -65,9 +55,6 @@ router.get('/:id', controller.get);
  * - role: User role (required) - 'client' or 'gestionnaire'
  * - password: User password (optional, defaults to "password")
  * 
- * Used by:
- * - User management interfaces
- * - Registration forms
  */
 router.post('/', controller.create);
 
@@ -79,10 +66,6 @@ router.post('/', controller.create);
  * Path parameters:
  * - id: User ID
  * 
- * Used by:
- * - User detail pages
- * - Customer history views
- * - Sales analysis interfaces
  */
 router.get('/:id/ventes', controller.ventes);
 

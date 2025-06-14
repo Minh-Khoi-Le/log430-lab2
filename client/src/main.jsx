@@ -2,11 +2,8 @@
  * Main Entry Point for the React Application
  * 
  */
-
-// Import Bootstrap CSS for styling
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { createRoot } from 'react-dom/client'
-// Import custom CSS
 import './assets/index.css'
 import App from './App.jsx'
 // Import context providers for global state management

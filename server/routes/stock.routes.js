@@ -35,7 +35,6 @@ router.get('/store/:storeId', controller.getByStore);
  * 
  * Update stock quantity for a specific product in a specific store.
  * Requires authentication with gestionnaire role.
- * 
  */
 router.put('/product/:productId', auth, controller.updateStock);
 

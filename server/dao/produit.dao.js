@@ -87,15 +87,14 @@ const ProduitDAO = {
    * Update Product
    * 
    * Updates an existing product in the database.
-   * Ensures that we don't include the stocks field to prevent Prisma validation errors.
+   * Stocks field is excluded to prevent Prisma validation errors. (Can be modified after update in edit form)
    * 
    * @param {number|string} id - Product ID
    * @param {Object} data - Updated product data
    * @returns {Promise<Object>} - Promise resolving to updated product
    */
   update: async (id, data) => {
-    // Extract only the fields we want to update, excluding stocks and any other fields
-    // that might cause validation errors
+    // Extract all the fields, excluding stocks and any other fields that might cause validation errors
     const { 
       nom, 
       prix, 
