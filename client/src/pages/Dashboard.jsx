@@ -31,16 +31,19 @@ import {
   IconButton,
   Grid,
   TablePagination,
+  Chip,
 } from "@mui/material";
 import StoreIcon from "@mui/icons-material/Store";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import CloseIcon from "@mui/icons-material/Close";
+import RefundIcon from '@mui/icons-material/AssignmentReturn';
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from "recharts";
 
 const Dashboard = () => {
   // State to store statistics data from API
   const [stats, setStats] = useState(null);
+  const [refundStats, setRefundStats] = useState(null);
   const navigate = useNavigate();
   
   // States for report generation
@@ -61,7 +64,19 @@ const Dashboard = () => {
     fetch("http://localhost:3000/api/v1/maisonmere/stats")
       .then((res) => res.json())
       .then((data) => setStats(data))
-      .catch(() => setStats([]));
+      .catch((err) => {
+        console.error("Error fetching stats:", err);
+        setStats([]);
+      });
+    
+    // API call to get refund statistics
+    fetch("http://localhost:3000/api/v1/maisonmere/refund-stats")
+      .then((res) => res.json())
+      .then((data) => setRefundStats(data))
+      .catch((err) => {
+        console.error("Error fetching refund stats:", err);
+        setRefundStats([]);
+      });
   }, []);
 
   // Navigate to store detail page
@@ -115,6 +130,20 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+  
+  // Gets refund stats for a specific store
+  const getRefundStatsForStore = (storeId) => {
+    if (!refundStats) return { count: 0, total: 0 };
+    const store = refundStats.find(s => s.id === storeId);
+    return store || { count: 0, total: 0 };
+  };
+  
+  // Get active sales count (total - refunded)
+  const getActiveSalesCount = (store) => {
+    if (!store || !refundStats) return 0;
+    const refund = getRefundStatsForStore(store.id);
+    return Math.max(0, store.ventesTotal - refund.count);
+  };
 
   return (
     <Box sx={{ maxWidth: 1100, mx: "auto", mt: 6, px: 2 }}>
@@ -158,6 +187,12 @@ const Dashboard = () => {
                   <b>Ventes totales</b>
                 </TableCell>
                 <TableCell align="right">
+                  <b>Remboursements</b>
+                </TableCell>
+                <TableCell align="right">
+                  <b>Ventes actives</b>
+                </TableCell>
+                <TableCell align="right">
                   <b>Produits vendus</b>
                 </TableCell>
                 <TableCell align="right">
@@ -185,6 +220,12 @@ const Dashboard = () => {
                       <Skeleton />
                     </TableCell>
                     <TableCell align="right">
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Skeleton />
+                    </TableCell>
+                    <TableCell align="right">
                       <Skeleton width={100} />
                     </TableCell>
                     <TableCell align="center">
@@ -196,21 +237,41 @@ const Dashboard = () => {
               {/* Empty state message */}
               {stats && stats.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">
+                  <TableCell colSpan={7} align="center">
                     Aucune donnée à afficher.
                   </TableCell>
                 </TableRow>
               )}
               
               {/* Store data rows */}
-              {stats?.map((magasin) => (
+              {stats?.map((magasin) => {
+                const refundData = getRefundStatsForStore(magasin.id);
+                const activeSales = getActiveSalesCount(magasin);
+                
+                return (
                 <TableRow key={magasin.id}>
                   <TableCell sx={{ fontWeight: 600 }}>{magasin.nom}</TableCell>
                   <TableCell align="right">{magasin.ventesTotal}</TableCell>
+                  <TableCell align="right">
+                    {refundData.count > 0 ? (
+                      <Chip 
+                        size="small" 
+                        label={`${refundData.count}`}
+                        color="error" 
+                        variant="outlined"
+                        icon={<RefundIcon fontSize="small" />}
+                      />
+                    ) : (
+                      "0"
+                    )}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 500, color: 'primary.main' }}>
+                    {activeSales}
+                  </TableCell>
                   <TableCell align="right">{magasin.produitsVendus}</TableCell>
                   <TableCell align="right">
                     <b style={{ color: "#127c50" }}>
-                      ${magasin.chiffreAffaires.toFixed(2)}
+                      {magasin.chiffreAffaires.toFixed(2)} €
                     </b>
                   </TableCell>
                   <TableCell align="center">
@@ -226,7 +287,7 @@ const Dashboard = () => {
                     </Tooltip>
                   </TableCell>
                 </TableRow>
-              ))}
+              )})}
             </TableBody>
           </Table>
         </TableContainer>
@@ -243,7 +304,10 @@ const Dashboard = () => {
             <PieChart>
               {/* Pie chart showing sales distribution */}
               <Pie
-                data={stats}
+                data={stats.map(store => ({
+                  nom: store.nom,
+                  ventesTotal: getActiveSalesCount(store) // Use active sales for the chart
+                }))}
                 dataKey="ventesTotal"
                 nameKey="nom"
                 cx="50%"
@@ -258,7 +322,7 @@ const Dashboard = () => {
                 ))}
               </Pie>
               {/* Interactive tooltips and legend */}
-              <RechartsTooltip formatter={(value) => `${value} ventes`} />
+              <RechartsTooltip formatter={(value) => `${value} ventes actives`} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
@@ -339,6 +403,7 @@ const Dashboard = () => {
                       <TableCell><b>Date</b></TableCell>
                       <TableCell><b>Magasin</b></TableCell>
                       <TableCell><b>Client</b></TableCell>
+                      <TableCell><b>Statut</b></TableCell>
                       <TableCell align="right"><b>Total</b></TableCell>
                       <TableCell align="right"><b>Produits</b></TableCell>
                     </TableRow>
@@ -346,7 +411,7 @@ const Dashboard = () => {
                   <TableBody>
                     {reportData.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} align="center">Aucune vente trouvée pour cette période</TableCell>
+                        <TableCell colSpan={6} align="center">Aucune vente trouvée pour cette période</TableCell>
                       </TableRow>
                     ) : (
                       // Display only current page of data
@@ -366,9 +431,22 @@ const Dashboard = () => {
                               <TableCell>{new Date(vente.date).toLocaleDateString()}</TableCell>
                               <TableCell>{vente.magasin.nom}</TableCell>
                               <TableCell>{`${vente.user?.nom}`}</TableCell>
+                              <TableCell>
+                                {vente.status === 'active' ? (
+                                  <Chip size="small" color="primary" label="Active" />
+                                ) : vente.status === 'refunded' ? (
+                                  <Chip size="small" color="error" label="Remboursée" />
+                                ) : (
+                                  <Chip size="small" color="warning" label="Partiellement remboursée" />
+                                )}
+                              </TableCell>
                               <TableCell align="right">
-                                <span style={{ color: "#127c50", fontWeight: 600 }}>
-                                  ${total.toFixed(2)}
+                                <span style={{ 
+                                  color: vente.status === 'active' ? "#127c50" : 
+                                         vente.status === 'refunded' ? "#d32f2f" : "#ed6c02",
+                                  fontWeight: 600 
+                                }}>
+                                  {total.toFixed(2)} €
                                 </span>
                               </TableCell>
                               <TableCell align="right">{products}</TableCell>

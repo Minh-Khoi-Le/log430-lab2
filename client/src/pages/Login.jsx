@@ -243,8 +243,8 @@ function Login() {
               Client:
             </p>
             <ul style={{ margin: "0", paddingLeft: "1.5rem", fontSize: "0.9rem" }}>
-              <li>Nom: <strong>C</strong></li>
-              <li>Mot de passe: <strong>p</strong></li>
+              <li>Nom: <strong>c</strong></li>
+              <li>Mot de passe: <strong>c</strong></li>
               <li>Choisir un magasin</li>
             </ul>
           </div>
@@ -254,8 +254,8 @@ function Login() {
               Gestionnaire:
             </p>
             <ul style={{ margin: "0", paddingLeft: "1.5rem", fontSize: "0.9rem" }}>
-              <li>Nom: <strong>G</strong></li>
-              <li>Mot de passe: <strong>p</strong></li>
+              <li>Nom: <strong>g</strong></li>
+              <li>Mot de passe: <strong>g</strong></li>
             </ul>
           </div>
         </div>

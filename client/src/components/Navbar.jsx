@@ -176,6 +176,18 @@ function Navbar() {
               Mon panier
             </Link>
           )}
+          
+          {/* History link - only for client role */}
+          {user?.role === "client" && (
+            <Link to="/history" style={{
+              color: location.pathname === "/history" ? "#3a8bff" : "#fff",
+              marginRight: 16,
+              textDecoration: "none",
+              fontWeight: 500
+            }}>
+              Historique
+            </Link>
+          )}
         </Box>
 
         {/* Right side: User information and account menu */}

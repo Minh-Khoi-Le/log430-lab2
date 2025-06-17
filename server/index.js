@@ -70,6 +70,7 @@ app.use('/api/v1/sales', (await import('./routes/vente.routes.js')).default);
 app.use('/api/v1/maisonmere', (await import('./routes/maisonmere.routes.js')).default);
 app.use('/api/v1/users', (await import('./routes/user.routes.js')).default);
 app.use('/api/v1/stock', (await import('./routes/stock.routes.js')).default);
+app.use('/api/v1/refunds', (await import('./routes/refund.routes.js')).default);
 
 /**
  * Global Error Handling Middleware

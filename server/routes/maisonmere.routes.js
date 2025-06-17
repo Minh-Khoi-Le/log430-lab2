@@ -266,30 +266,40 @@ router.delete("/magasins/:id", async (req, res) => {
 /**
  * GET /api/v1/maisonmere/stats
  * 
- * Get performance statistics for all stores
+ * Get consolidated statistics for all stores
  * 
- * Returns:
- * - Sales totals
- * - Revenue figures
- * - Products sold
+ * Query parameters:
+ * - excludeRefunded: If 'true', excludes refunded sales from statistics
  * 
  * Used by:
- * - Admin dashboard
+ * - Dashboard page
+ * - Management reports
  */
-router.get('/stats', controller.stats);
+router.get("/stats", controller.getStats);
+
+/**
+ * GET /api/v1/maisonmere/refund-stats
+ * 
+ * Get refund statistics for all stores
+ * 
+ * Used by:
+ * - Dashboard page
+ * - Management reports
+ */
+router.get("/refund-stats", controller.getRefundStats);
 
 /**
  * GET /api/v1/maisonmere/ventes-consolidees
  * 
- * Get consolidated sales data across all stores
+ * Get consolidated sales data within a date range
  * 
  * Query parameters:
- * - debut: Start date for filtering 
- * - fin: End date for filtering 
+ * - debut: Start date in YYYY-MM-DD format
+ * - fin: End date in YYYY-MM-DD format
  * 
  * Used by:
- * - Admin dashboard
+ * - Sales report generation
  */
-router.get('/ventes-consolidees', controller.ventesConsolidees);
+router.get("/ventes-consolidees", controller.getConsolidatedSales);
 
 export default router;

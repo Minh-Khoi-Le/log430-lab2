@@ -49,6 +49,37 @@ router.get('/', controller.list);
 router.post('/', controller.create);
 
 /**
+ * POST /api/v1/sales/refund
+ * 
+ * Refund a sale transaction
+ * 
+ * Request body:
+ * - saleId: ID of the sale to refund
+ * 
+ * The endpoint handles:
+ * - Returning products to stock
+ * - Removing the sale record
+ * - Transaction consistency
+ * 
+ * Used by:
+ * - Client history page
+ */
+router.post('/refund', controller.refund);
+
+/**
+ * GET /api/v1/sales/history
+ * 
+ * Get all sales for the current user based on the user ID in the request body
+ * 
+ * Request body:
+ * - userId: User ID
+ * 
+ * Used by:
+ * - Client history page
+ */
+router.post('/history', controller.byClient);
+
+/**
  * GET /api/v1/sales/client/:clientId
  * 
  * Get all sales for a specific client

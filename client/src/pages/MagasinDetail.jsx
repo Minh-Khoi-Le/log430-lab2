@@ -26,11 +26,18 @@ import {
   Button,
   CircularProgress,
   Divider,
-  Alert
+  Alert,
+  Stack,
+  Chip,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material';
 import StoreIcon from '@mui/icons-material/Store';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import PersonIcon from '@mui/icons-material/Person';
 
 function MagasinDetail() {
   const { storeId } = useParams();
@@ -220,61 +227,105 @@ function MagasinDetail() {
           {sales.length === 0 ? (
             <Alert severity="info">Aucune vente récente</Alert>
           ) : (
-            <Grid container spacing={3}>
+            <Stack spacing={2}>
               {sales.map((vente) => (
-                <Grid item xs={12} key={vente.id}>
-                  <Card>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                        <Typography variant="subtitle1">
-                          <strong>Vente #{vente.id}</strong>
-                        </Typography>
-                        <Typography variant="subtitle2" color="text.secondary">
-                          {formatDate(vente.date)}
-                        </Typography>
-                      </Box>
-                      
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        Client: <strong>{vente.user?.nom || 'Client inconnu'}</strong>
+                <Paper 
+                  elevation={2} 
+                  key={vente.id} 
+                  sx={{
+                    overflow: 'hidden',
+                    borderRadius: 2,
+                    transition: 'all 0.2s',
+                    '&:hover': {
+                      boxShadow: 4
+                    }
+                  }}
+                >
+                  <Box sx={{ 
+                    p: 2, 
+                    bgcolor: '#f8f9fa', 
+                    borderBottom: '1px solid rgba(0,0,0,0.1)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap'
+                  }}>
+                    <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                      Vente #{vente.id}
+                    </Typography>
+                    <Chip 
+                      label={`Total: ${vente.total.toFixed(2)} €`}
+                      color="primary"
+                      icon={<ReceiptIcon />}
+                    />
+                  </Box>
+                  
+                  <Box sx={{ px: 2, py: 1, display: "flex", gap: 3, bgcolor: '#f8f9fa', flexWrap: 'wrap' }}>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <CalendarTodayIcon sx={{ mr: 1, fontSize: 18, color: 'text.secondary' }} />
+                      <Typography variant="body2" color="text.secondary">
+                        {formatDate(vente.date)}
                       </Typography>
-                      
-                      <Divider sx={{ my: 1 }} />
-                      
-                      <TableContainer sx={{ maxHeight: 200 }}>
-                        <Table size="small">
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Produit</TableCell>
-                              <TableCell align="right">Quantité</TableCell>
-                              <TableCell align="right">Prix unitaire</TableCell>
-                              <TableCell align="right">Total</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {vente.lignes.map((ligne) => (
-                              <TableRow key={ligne.id}>
-                                <TableCell>{ligne.product?.nom || 'Produit inconnu'}</TableCell>
-                                <TableCell align="right">{ligne.quantite}</TableCell>
-                                <TableCell align="right">${ligne.prixUnitaire.toFixed(2)}</TableCell>
-                                <TableCell align="right">
-                                  ${(ligne.quantite * ligne.prixUnitaire).toFixed(2)}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                      
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                        <Typography variant="subtitle1" color="primary">
-                          <strong>Total: ${vente.total.toFixed(2)}</strong>
-                        </Typography>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
+                    </Box>
+                    
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <PersonIcon sx={{ mr: 1, fontSize: 18, color: 'text.secondary' }} />
+                      <Typography variant="body2" color="text.secondary">
+                        {vente.user?.nom || 'Client inconnu'}
+                      </Typography>
+                    </Box>
+
+                    {vente.status && vente.status !== 'active' && (
+                      <Chip 
+                        size="small"
+                        label={vente.status === 'refunded' ? 'Remboursé' : 'Partiellement remboursé'}
+                        color={vente.status === 'refunded' ? 'error' : 'warning'}
+                        variant="outlined"
+                      />
+                    )}
+                  </Box>
+                  
+                  <Divider />
+                  
+                  <Box sx={{ p: 2 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                      Articles vendus:
+                    </Typography>
+                    <List disablePadding>
+                      {vente.lignes.map((ligne) => (
+                        <ListItem 
+                          key={ligne.id} 
+                          disablePadding 
+                          sx={{ 
+                            py: 1,
+                            borderBottom: '1px solid rgba(0,0,0,0.06)',
+                            '&:last-child': { borderBottom: 'none' }
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                  {ligne.product?.nom || 'Produit inconnu'}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  {(ligne.quantite * ligne.prixUnitaire).toFixed(2)} €
+                                </Typography>
+                              </Box>
+                            }
+                            secondary={
+                              <Typography variant="caption" color="text.secondary">
+                                {ligne.quantite} x {ligne.prixUnitaire.toFixed(2)} €
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Box>
+                </Paper>
               ))}
-            </Grid>
+            </Stack>
           )}
         </Paper>
       )}

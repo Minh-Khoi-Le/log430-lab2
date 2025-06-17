@@ -10,7 +10,7 @@ export default {
   
   // The glob patterns Jest uses to detect test files
   testMatch: [
-    '**/tests/**/*.test.js'
+    process.env.NODE_ENV === 'test' ? '**/tests/**/*.test.js' : []
   ],
   
   // Indicates whether the coverage information should be collected
@@ -40,4 +40,9 @@ export default {
   
   // Setup files to run before tests
   setupFilesAfterEnv: ['./tests/setup.js'],
+  
+  // Explicitly disable watch mode
+  watch: false,
+  watchAll: false,
+  watchman: false,
 }; 

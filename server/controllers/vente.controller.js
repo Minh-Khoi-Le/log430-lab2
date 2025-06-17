@@ -133,7 +133,14 @@ export async function list(req, res, next) {
  */
 export async function byClient(req, res, next) {
   try {
-    const ventes = await VenteDAO.getByUser(req.params.clientId);
+    // Use client ID from either path parameter or request body
+    const clientId = req.params.clientId || req.body.userId;
+    
+    if (!clientId) {
+      return res.status(400).json({ error: "Client ID is required" });
+    }
+    
+    const ventes = await VenteDAO.getByUser(clientId);
     res.json(ventes);
   } catch (err) { next(err); }
 }
@@ -155,4 +162,76 @@ export async function byStore(req, res, next) {
     const ventes = await VenteDAO.getByStore(req.params.storeId, limit);
     res.json(ventes);
   } catch (err) { next(err); }
+}
+
+/**
+ * Refund Sale Controller
+ * 
+ * Refunds a sale by adding products back to stock and removing the sale.
+ * 
+ * @param {Request} req - Express request object with sale ID parameter
+ * @param {Response} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+export async function refund(req, res, next) {
+  try {
+    const { saleId } = req.body;
+    
+    if (!saleId) {
+      return res.status(400).json({ error: "Sale ID is required" });
+    }
+
+    // Find the sale with all its details
+    const sale = await prisma.vente.findUnique({
+      where: { id: parseInt(saleId) },
+      include: { 
+        lignes: true,
+        magasin: true,
+        user: true
+      }
+    });
+    
+    if (!sale) {
+      return res.status(404).json({ error: "Vente non trouvée" });
+    }
+
+    // Execute refund in a transaction to ensure consistency
+    const result = await prisma.$transaction(async (tx) => {
+      // Return stock for each product in the sale
+      for (const ligne of sale.lignes) {
+        await tx.stock.updateMany({
+          where: { 
+            productId: ligne.productId, 
+            magasinId: sale.magasinId 
+          },
+          data: { 
+            quantite: { 
+              increment: ligne.quantite 
+            } 
+          }
+        });
+      }
+      
+      // Delete the sale lines first (due to foreign key constraints)
+      await tx.vente_ligne.deleteMany({
+        where: { venteId: sale.id }
+      });
+      
+      // Delete the sale
+      const deletedSale = await tx.vente.delete({
+        where: { id: sale.id }
+      });
+      
+      return deletedSale;
+    });
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Remboursement effectué avec succès",
+      refundedSale: result
+    });
+  } catch (err) {
+    console.error("Refund error:", err);
+    next(err);
+  }
 } 

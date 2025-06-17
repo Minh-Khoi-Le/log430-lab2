@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Products from "./pages/Products";
 import Dashboard from "./pages/Dashboard";
 import CartPage from "./pages/CartPage";
+import History from "./pages/History";
 import MagasinDetail from "./pages/MagasinDetail";
 import Navbar from "./components/Navbar";
 import { UserProvider, useUser } from "./context/UserContext";
@@ -45,7 +46,10 @@ function MainApp() {
         
         {/* Shopping cart - only accessible to users with client role */}
         {user.role === "client" && (
-          <Route path="/panier" element={<CartPage />} />
+          <>
+            <Route path="/panier" element={<CartPage />} />
+            <Route path="/history" element={<History />} />
+          </>
         )}
         
         {/* Redirect all other routes to home */}
