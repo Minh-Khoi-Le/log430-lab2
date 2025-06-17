@@ -59,18 +59,6 @@ CREATE TABLE "LigneVente" (
     CONSTRAINT "LigneVente_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Restock" (
-    "id" SERIAL NOT NULL,
-    "productId" INTEGER NOT NULL,
-    "magasinId" INTEGER NOT NULL,
-    "quantite" INTEGER NOT NULL,
-    "statut" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Restock_pkey" PRIMARY KEY ("id")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "Stock_magasinId_productId_key" ON "Stock"("magasinId", "productId");
 
@@ -94,9 +82,3 @@ ALTER TABLE "LigneVente" ADD CONSTRAINT "LigneVente_venteId_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "LigneVente" ADD CONSTRAINT "LigneVente_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Restock" ADD CONSTRAINT "Restock_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Restock" ADD CONSTRAINT "Restock_magasinId_fkey" FOREIGN KEY ("magasinId") REFERENCES "Magasin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

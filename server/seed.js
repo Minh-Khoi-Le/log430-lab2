@@ -39,7 +39,6 @@ async function main() {
   await prisma.ligneVente?.deleteMany?.();
   await prisma.vente?.deleteMany?.();
   await prisma.stock?.deleteMany?.();
-  await prisma.restock?.deleteMany?.();
   await prisma.magasin.deleteMany({});
   await prisma.product.deleteMany({});
   await prisma.user?.deleteMany?.();

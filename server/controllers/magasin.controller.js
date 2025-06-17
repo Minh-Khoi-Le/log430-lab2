@@ -8,7 +8,7 @@
 
 import MagasinDAO from '../dao/magasin.dao.js';
 import StockDAO from '../dao/stock.dao.js';
-import RestockDAO from '../dao/restock.dao.js';
+
 
 /**
  * List Stores Controller
@@ -110,40 +110,3 @@ export async function stock(req, res, next) {
     res.json(stocks);
   } catch (err) { next(err); }
 }
-
-/**
- * Get Store Restock Requests Controller
- * 
- * Retrieves all restock requests for a specific store.
- * 
- * @param {Request} req - Express request object with store ID parameter
- * @param {Response} res - Express response object
- * @param {Function} next - Express next middleware function
- */
-export async function restockRequests(req, res, next) {
-  try {
-    const demandes = await RestockDAO.getRequestsByMagasin(req.params.magasinId);
-    res.json(demandes);
-  } catch (err) { next(err); }
-}
-
-/**
- * Create Restock Request Controller
- * 
- * Creates a new restock request for a specific store.
- * 
- * @param {Request} req - Express request object with store ID parameter and restock data in body
- * @param {Response} res - Express response object
- * @param {Function} next - Express next middleware function
- */
-export async function createRestock(req, res, next) {
-  try {
-    const { productId, quantite } = req.body;
-    const request = await RestockDAO.createRequest({
-      productId,
-      magasinId: req.params.magasinId,
-      quantite
-    });
-    res.status(201).json(request);
-  } catch (err) { next(err); }
-} 

@@ -30,11 +30,29 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  client:
+  client1:
     build: ./client
-    container_name: log430-client
+    container_name: log430-client1
     ports:
       - "5173:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+  client2:
+    build: ./client
+    container_name: log430-client2
+    ports:
+      - "5174:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+  client3:
+    build: ./client
+    container_name: log430-client3
+    ports:
+      - "5175:80"
     depends_on:
       - server
     restart: unless-stopped
