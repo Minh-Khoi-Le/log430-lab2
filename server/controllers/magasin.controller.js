@@ -138,9 +138,9 @@ export async function restockRequests(req, res, next) {
  */
 export async function createRestock(req, res, next) {
   try {
-    const { produitId, quantite } = req.body;
+    const { productId, quantite } = req.body;
     const request = await RestockDAO.createRequest({
-      produitId,
+      productId,
       magasinId: req.params.magasinId,
       quantite
     });

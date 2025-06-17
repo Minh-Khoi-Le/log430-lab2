@@ -355,10 +355,10 @@ const Dashboard = () => {
                         .map((vente) => {
                           // Calculate total for this sale
                           let total = 0;
-                          let produits = 0;
+                          let products = 0;
                           vente.lignes.forEach(ligne => {
                             total += ligne.prixUnitaire * ligne.quantite;
-                            produits += ligne.quantite;
+                            products += ligne.quantite;
                           });
                           
                           return (
@@ -371,7 +371,7 @@ const Dashboard = () => {
                                   ${total.toFixed(2)}
                                 </span>
                               </TableCell>
-                              <TableCell align="right">{produits}</TableCell>
+                              <TableCell align="right">{products}</TableCell>
                             </TableRow>
                           );
                         })

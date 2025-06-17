@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-const produits = [
+const products = [
   { nom: "Baguette", prix: 2.99, description: "Pain français classique" },
   { nom: "Fromage", prix: 7.99, description: "Fromage affiné artisanal" },
   { nom: "Jambon", prix: 4.29, description: "Jambon de qualité supérieure" },
@@ -41,25 +41,25 @@ async function main() {
   await prisma.stock?.deleteMany?.();
   await prisma.restock?.deleteMany?.();
   await prisma.magasin.deleteMany({});
-  await prisma.produit.deleteMany({});
+  await prisma.product.deleteMany({});
   await prisma.user?.deleteMany?.();
 
   // Insert products, stores and users
-  await prisma.produit.createMany({ data: produits });
+  await prisma.product.createMany({ data: products });
   await prisma.magasin.createMany({ data: magasins });
   await prisma.user.createMany({ data: users });
 
   // Get the products, stores and users inserted
-  const produitsList = await prisma.produit.findMany();
+  const productsList = await prisma.product.findMany();
   const magasinsList = await prisma.magasin.findMany();
   const clientsList = await prisma.user.findMany({ where: { role: 'client' } });
 
   // Create stocks for each product X store
   for (const magasin of magasinsList) {
-    for (const produit of produitsList) {
+    for (const product of productsList) {
       await prisma.stock.create({
         data: {
-          produitId: produit.id,
+          productId: product.id,
           magasinId: magasin.id,
           quantite: getRandomInt(20, 100) // stock random
         }
@@ -74,15 +74,15 @@ async function main() {
       // Random client among the users with role 'client'
       const client = clientsList[getRandomInt(0, clientsList.length - 1)];
       // 1 to 4 different products per sale
-      const produitsChoisis = [...produitsList]
+      const productsChoisis = [...productsList]
         .sort(() => Math.random() - 0.5)
         .slice(0, getRandomInt(1, 4));
 
       // Generate sale lines
-      const lignes = produitsChoisis.map(produit => ({
-        produitId: produit.id,
+      const lignes = productsChoisis.map(product => ({
+        productId: product.id,
         quantite: getRandomInt(1, 5),
-        prixUnitaire: produit.prix
+        prixUnitaire: product.prix
       }));
 
       // Calculate the total of the sale
@@ -102,7 +102,7 @@ async function main() {
     }
   }
 
-  console.log("Données seedées (produits, magasins, stocks, users, ventes) !");
+  console.log("Données seedées (products, magasins, stocks, users, ventes) !");
 }
 
 main()

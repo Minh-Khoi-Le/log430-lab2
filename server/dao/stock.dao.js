@@ -19,36 +19,36 @@ const StockDAO = {
   getStockByMagasin: async (magasinId) =>
     prisma.stock.findMany({
       where: { magasinId: parseInt(magasinId) },
-      include: { produit: true },
+      include: { product: true },
     }),
     
   /**
    * Update Stock Quantity
    * 
-   * Updates the stock quantity for a specific product in a specific store.
+   * Updates the stock quantity for a spec ific product in a specific store.
    * Creates a new stock record if one doesn't exist.
    * 
-   * @param {number|string} produitId - Product ID
+   * @param {number|string} productId - Product ID
    * @param {number|string} magasinId - Store ID
    * @param {number} quantite - New stock quantity
    * @returns {Promise<Object>} - Promise resolving to the updated stock record
    */
-  updateStock: async (produitId, magasinId, quantite) => {
-    const numericProduitId = parseInt(produitId);
+  updateStock: async (productId, magasinId, quantite) => {
+    const numericProductId = parseInt(productId);
     const numericMagasinId = parseInt(magasinId);
     const numericQuantite = parseInt(quantite);
     
     return prisma.stock.upsert({
       where: {
-        magasinId_produitId: {
+        magasinId_productId: {
           magasinId: numericMagasinId,
-          produitId: numericProduitId
+          productId: numericProductId
         }
       },
       update: { quantite: numericQuantite },
       create: {
         magasinId: numericMagasinId,
-        produitId: numericProduitId,
+        productId: numericProductId,
         quantite: numericQuantite
       }
     });
@@ -59,12 +59,12 @@ const StockDAO = {
    * 
    * Retrieves all stock records for a specific product across all stores.
    * 
-   * @param {number|string} produitId - Product ID
+   * @param {number|string} productId - Product ID
    * @returns {Promise<Array>} - Promise resolving to array of stock records
    */
-  getStockByProduct: async (produitId) =>
+  getStockByProduct: async (productId) =>
     prisma.stock.findMany({
-      where: { produitId: parseInt(produitId) },
+      where: { productId: parseInt(productId) },
       include: { magasin: true }
     })
 };

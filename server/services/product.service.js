@@ -11,7 +11,7 @@
  * on product data.
  */
 
-import dao from '../dao/produit.dao.js';
+import dao from '../dao/product.dao.js';
 
 /**
  * List Products Service

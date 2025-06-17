@@ -20,7 +20,7 @@ const CartPage = () => {
   const [receiptData, setReceiptData] = useState(null);
   
   // Calculate total price of all items in cart
-  const total = cart.reduce((sum, item) => sum + item.produit.prix * item.quantite, 0);
+  const total = cart.reduce((sum, item) => sum + item.product.prix * item.quantite, 0);
 
   /**
    * Handle checkout process
@@ -40,9 +40,9 @@ const CartPage = () => {
           clientNom: user.nom,
           magasinId: user.magasinId, 
           panier: cart.map(item => ({
-            produitId: item.produit.id,
+            productId: item.product.id,
             quantite: item.quantite,
-            prix: item.produit.prix
+            prix: item.product.prix
           }))
         })
       });
@@ -111,7 +111,7 @@ const CartPage = () => {
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {cart.map((item) => (
               <li
-                key={item.produit.id}
+                key={item.product.id}
                 style={{
                   marginBottom: 16,
                   display: "flex",
@@ -126,10 +126,10 @@ const CartPage = () => {
               >
                 {/* Item details */}
                 <span>
-                  <span style={{ fontWeight: 700 }}>{item.produit.nom}</span>
+                  <span style={{ fontWeight: 700 }}>{item.product.nom}</span>
                   &nbsp;x {item.quantite}
                   <span style={{ color: "#6070FF", fontWeight: 400 }}>
-                    &nbsp;-&nbsp;${item.produit.prix.toFixed(2)}
+                    &nbsp;-&nbsp;${item.product.prix.toFixed(2)}
                   </span>
                 </span>
                 
@@ -166,7 +166,7 @@ const CartPage = () => {
                     e.currentTarget.style.color = "#2a3557";
                     e.currentTarget.style.border = "1.5px solid #c8c8e8";
                   }}
-                  onClick={() => removeFromCart(item.produit.id)}
+                  onClick={() => removeFromCart(item.product.id)}
                   disabled={loading}
                 >
                   Retirer
@@ -243,17 +243,17 @@ const CartPage = () => {
               margin: "15px 0"
             }}>
               {receiptData.items.map((item) => (
-                <div key={item.produit.id} style={{ 
+                <div key={item.product.id} style={{ 
                   display: "flex", 
                   justifyContent: "space-between",
                   margin: "8px 0",
                   fontSize: "15px"
                 }}>
                   <div>
-                    <span style={{ fontWeight: "bold" }}>{item.produit.nom}</span>
+                    <span style={{ fontWeight: "bold" }}>{item.product.nom}</span>
                     <span style={{ color: "#666" }}> x{item.quantite}</span>
                   </div>
-                  <div>${(item.produit.prix * item.quantite).toFixed(2)}</div>
+                  <div>${(item.product.prix * item.quantite).toFixed(2)}</div>
                 </div>
               ))}
             </div>

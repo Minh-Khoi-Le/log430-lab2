@@ -27,32 +27,32 @@ export function CartProvider({ children }) {
 
   /**
    * Add a product to the cart
-   * @param {Object} produit - Product to add to cart
+   * @param {Object} product - Product to add to cart 
    */
-  const addToCart = (produit) => {
+  const addToCart = (product) => {
     setCart((cart) => {
-      const exist = cart.find((item) => item.produit.id === produit.id);
+      const exist = cart.find((item) => item.product.id === product.id);
       if (exist) {
         return cart.map((item) =>
-          item.produit.id === produit.id
+          item.product.id === product.id
             ? { ...item, quantite: item.quantite + 1 }
             : item
         );
       } else {
-        return [...cart, { produit, quantite: 1 }];
+        return [...cart, { product, quantite: 1 }];
       }
     });
   };
 
   /**
    * Remove a product from the cart
-   * @param {number} produitId - ID of the product to remove
+   * @param {number} productId - ID of the product to remove
    */
-  const removeFromCart = (produitId) => {
+  const removeFromCart = (productId) => {
     setCart((cart) =>
       cart
         .map((item) =>
-          item.produit.id === produitId
+          item.product.id === productId
             ? { ...item, quantite: item.quantite - 1 }
             : item
         )

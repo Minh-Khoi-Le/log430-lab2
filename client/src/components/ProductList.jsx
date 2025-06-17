@@ -15,14 +15,14 @@ import { useUser } from "../context/UserContext";
  * ProductList Component
  * 
  * @param {Object} props - Component props
- * @param {Array} props.produits - Array of product objects to display
+ * @param {Array} props.products - Array of product objects to display
  * @param {Function} props.onDelete - Optional handler for product deletion (for admin role)
  * @param {Function} props.onEdit - Optional handler for product editing (for admin role)
  * @param {boolean} props.hideUnavailable - Optional flag to hide products not available in client's store
  * @returns {JSX.Element} Grid of product cards
  */
 const ProductList = ({
-  produits,
+  products,
   onDelete,
   onEdit,
   hideUnavailable = false
@@ -30,11 +30,11 @@ const ProductList = ({
   const { user } = useUser();
   
   // For clients with hideUnavailable enabled, filter products by availability in their store
-  let displayProducts = produits;
+    let displayProducts = products;
   
   if (user?.role === "client" && hideUnavailable) {
-    displayProducts = produits.filter(produit => {
-      const storeStock = produit.stocks?.find(s => s.magasinId === user.magasinId);
+    displayProducts = products.filter(product => {
+      const storeStock = product.stocks?.find(s => s.magasinId === user.magasinId);
       return storeStock && storeStock.quantite > 0;
     });
   }
@@ -44,7 +44,7 @@ const ProductList = ({
     return (
       <Box sx={{ width: "100%", textAlign: "center", py: 8 }}>
         <Typography variant="h6" color="text.secondary">
-          Aucun produit disponible
+          No product available
         </Typography>
       </Box>
     );
@@ -54,11 +54,11 @@ const ProductList = ({
     <Box sx={{ width: "100%", px: 4, py: 2 }}>
       {/* Responsive grid container for product cards */}
       <Grid container spacing={4} justifyContent="flex-start">
-        {displayProducts.map((produit) => (
-          <Grid key={produit.id}>
+        {displayProducts.map((product) => (
+          <Grid key={product.id}>
             {/* Individual product card with edit/delete handlers */}
             <ProductCard
-              produit={produit}
+              product={product}
               onDelete={onDelete}
               onEdit={onEdit}
             />

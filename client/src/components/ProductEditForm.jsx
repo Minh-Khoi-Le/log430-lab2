@@ -28,13 +28,13 @@ import {
  * ProductEditForm Component
  * 
  * @param {Object} props - Component props
- * @param {Object} props.produit - Product object to edit
+ * @param {Object} props.product - Product object to edit
  * @param {Function} props.onSave - Handler function called when save button is clicked
  * @param {Function} props.onCancel - Handler function called when cancel button is clicked
  * @param {boolean} [props.isNewProduct] - Whether this form is for creating a new product
  * @returns {JSX.Element} Product edit form
  */
-const ProductEditForm = ({ produit, onSave, onCancel, isNewProduct = false }) => {
+const ProductEditForm = ({ product, onSave, onCancel, isNewProduct = false }) => {
   // Local state for form fields to enable controlled inputs
   const [form, setForm] = useState({ 
     nom: "",
@@ -52,20 +52,20 @@ const ProductEditForm = ({ produit, onSave, onCancel, isNewProduct = false }) =>
 
   // Initialize form with product data when component mounts or product changes
   useEffect(() => {
-    if (produit) {
+    if (product) {
       // Set base product data
       setForm({
-        nom: produit.nom || "",
-        prix: produit.prix || 0,
-        description: produit.description || ""
+        nom: product.nom || "",
+        prix: product.prix || 0,
+        description: product.description || ""
       });
       
       // Fetch all available stores and stock information for existing products
-      if (produit.id && !isNewProduct) {
-        fetchStockData(produit.id);
+      if (product.id && !isNewProduct) {
+        fetchStockData(product.id);
       }
     }
-  }, [produit, isNewProduct]);
+  }, [product, isNewProduct]);
   
   // Fetch stock data for this product
   const fetchStockData = async (productId) => {
@@ -128,7 +128,7 @@ const ProductEditForm = ({ produit, onSave, onCancel, isNewProduct = false }) =>
       
       // Save stock changes for each store
       const promises = stocks.map(stock => 
-        fetch(`http://localhost:3000/api/v1/stock/product/${produit.id}`, {
+        fetch(`http://localhost:3000/api/v1/stock/product/${product.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -145,7 +145,7 @@ const ProductEditForm = ({ produit, onSave, onCancel, isNewProduct = false }) =>
       setSaveSuccess(true);
       
       // Refresh stock data
-      fetchStockData(produit.id);
+      fetchStockData(product.id);
     } catch (error) {
       console.error("Error saving stock changes:", error);
     } finally {
@@ -169,7 +169,7 @@ const ProductEditForm = ({ produit, onSave, onCancel, isNewProduct = false }) =>
     
     // Prepare product data
     const productData = {
-      ...(isNewProduct ? {} : { id: produit.id }),
+      ...(isNewProduct ? {} : { id: product.id }),
       nom: form.nom,
       prix: parseFloat(form.prix),
       description: form.description

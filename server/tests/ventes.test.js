@@ -107,7 +107,7 @@ afterAll(async () => {
   }
   
   if (testProductId) {
-    await prisma.produit.delete({
+    await prisma.product.delete({
       where: { id: testProductId }
     });
   }
@@ -130,7 +130,7 @@ describe('Sales Operations', () => {
       userId: clientId,
       lignes: [
         {
-          produitId: productId,
+          productId: productId,
           quantite: 2,
           prixUnitaire: testProduct.prix
         }

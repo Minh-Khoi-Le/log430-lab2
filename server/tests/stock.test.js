@@ -74,7 +74,7 @@ afterAll(async () => {
   }
   
   if (testProductId) {
-    await prisma.produit.delete({
+    await prisma.product.delete({
       where: { id: testProductId }
     });
   }
@@ -99,7 +99,7 @@ describe('Stock Operations', () => {
     expect(Array.isArray(response.body)).toBe(true);
     expect(response.body.length).toBeGreaterThan(0);
     
-    const stockEntry = response.body.find(s => s.produitId === testProductId && s.magasinId === testStoreId);
+    const stockEntry = response.body.find(s => s.productId === testProductId && s.magasinId === testStoreId);
     expect(stockEntry).toBeDefined();
     expect(stockEntry.quantite).toBe(10);
   });
@@ -126,7 +126,7 @@ describe('Stock Operations', () => {
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
     
-    const stockEntry = response.body.find(s => s.produitId === testProductId);
+    const stockEntry = response.body.find(s => s.productId === testProductId);
     expect(stockEntry).toBeDefined();
   });
 

@@ -6,7 +6,7 @@
 
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
-import ProduitDAO from '../dao/produit.dao.js';
+import ProductDAO from '../dao/product.dao.js';
 import MagasinDAO from '../dao/magasin.dao.js';
 import * as controller from '../controllers/maisonmere.controller.js';
 
@@ -15,8 +15,8 @@ const router = express.Router();
 
 
 //PRODUCT MANAGEMENT ROUTES
-/**
- * GET /api/v1/maisonmere/produits
+/** 
+ * GET /api/v1/maisonmere/products
  * 
  * Get all products in the catalog
  * 
@@ -24,10 +24,10 @@ const router = express.Router();
  * - Parent company product management interfaces
  * - Catalog management dashboards
  */
-router.get("/produits", async (req, res) => {
+router.get("/products", async (req, res) => {
   try {
-    const produits = await ProduitDAO.getAll();
-    res.json(produits);
+    const products = await ProductDAO.getAll();
+    res.json(products);
   } catch (err) {
     res
       .status(500)
@@ -36,7 +36,7 @@ router.get("/produits", async (req, res) => {
 });
 
 /**
- * GET /api/v1/maisonmere/produits/:id
+ * GET /api/v1/maisonmere/products/:id
  * 
  * Get detailed information about a specific product
  * 
@@ -47,11 +47,11 @@ router.get("/produits", async (req, res) => {
  * - Product detail pages in parent company interfaces
  * - Product editing forms
  */
-router.get("/produits/:id", async (req, res) => {
+router.get("/products/:id", async (req, res) => {
   try {
-    const produit = await ProduitDAO.getById(req.params.id);
-    if (!produit) return res.status(404).json({ error: "Produit non trouvé" });
-    res.json(produit);
+    const product = await ProductDAO.getById(req.params.id);
+    if (!product) return res.status(404).json({ error: "Produit non trouvé" });
+    res.json(product);
   } catch (err) {
     res
       .status(500)
@@ -60,7 +60,7 @@ router.get("/produits/:id", async (req, res) => {
 });
 
 /**
- * POST /api/v1/maisonmere/produits
+ * POST /api/v1/maisonmere/products
  * 
  * Create a new product in the catalog
  * 
@@ -73,7 +73,7 @@ router.get("/produits/:id", async (req, res) => {
  * - Admin product list page
  * - New product creation forms
  */
-router.post("/produits", async (req, res) => {
+router.post("/products", async (req, res) => {
   try {
     const { nom, prix, stock } = req.body;
     
@@ -86,7 +86,7 @@ router.post("/produits", async (req, res) => {
     // Use a transaction to create the product and set initial stock levels
     const nouveau = await prisma.$transaction(async (tx) => {
       // Create the product
-      const product = await tx.produit.create({ data: productData });
+      const product = await tx.product.create({ data: productData });
       
       // Get all stores
       const stores = await tx.magasin.findMany();
@@ -97,7 +97,7 @@ router.post("/produits", async (req, res) => {
       for (const store of stores) {
         await tx.stock.create({
           data: {
-            produitId: product.id,
+            productId: product.id,
             magasinId: store.id,
             quantite: stockValue
           }
@@ -105,7 +105,7 @@ router.post("/produits", async (req, res) => {
       }
       
       // Return the product with stock information
-      return tx.produit.findUnique({
+      return tx.product.findUnique({
         where: { id: product.id },
         include: { stocks: true }
       });
@@ -123,7 +123,7 @@ router.post("/produits", async (req, res) => {
 });
 
 /**
- * PUT /api/v1/maisonmere/produits/:id
+ * PUT /api/v1/maisonmere/products/:id
  * 
  * Update an existing product in the catalog
  * 
@@ -139,10 +139,10 @@ router.post("/produits", async (req, res) => {
  * - Admin product list page 
  * - Product editing forms
  */
-router.put("/produits/:id", async (req, res) => {
+router.put("/products/:id", async (req, res) => {
   try {
     const { nom, prix, stock } = req.body;
-    const maj = await ProduitDAO.update(req.params.id, {
+    const maj = await ProductDAO.update(req.params.id, {
       nom,
       prix: parseFloat(prix),
       stock: parseInt(stock),
@@ -159,7 +159,7 @@ router.put("/produits/:id", async (req, res) => {
 });
 
 /**
- * DELETE /api/v1/maisonmere/produits/:id
+* DELETE /api/v1/maisonmere/products/:id
  * 
  * Remove a product from the catalog
  * 
@@ -170,9 +170,9 @@ router.put("/produits/:id", async (req, res) => {
  * - Admin product list page
  * - Product discontinuation workflows
  */
-router.delete("/produits/:id", async (req, res) => {
+router.delete("/products/:id", async (req, res) => {
   try {
-    await ProduitDAO.delete(req.params.id);
+    await ProductDAO.delete(req.params.id);
     res.json({ success: true });
   } catch (err) {
     res.status(404).json({ error: "Produit non trouvé", details: err.message });

@@ -187,9 +187,9 @@ function MagasinDetail() {
                 <TableBody>
                   {stocks.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell>{item.produit.nom}</TableCell>
-                      <TableCell>{item.produit.description || '—'}</TableCell>
-                      <TableCell align="right">${item.produit.prix.toFixed(2)}</TableCell>
+                      <TableCell>{item.product.nom}</TableCell>
+                      <TableCell>{item.product.description || '—'}</TableCell>
+                      <TableCell align="right">${item.product.prix.toFixed(2)}</TableCell>
                       <TableCell align="right">
                         <Box component="span" sx={{
                           fontWeight: 'bold',
@@ -199,7 +199,7 @@ function MagasinDetail() {
                         </Box>
                       </TableCell>
                       <TableCell align="right">
-                        ${(item.quantite * item.produit.prix).toFixed(2)}
+                        ${(item.quantite * item.product.prix).toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -253,7 +253,7 @@ function MagasinDetail() {
                           <TableBody>
                             {vente.lignes.map((ligne) => (
                               <TableRow key={ligne.id}>
-                                <TableCell>{ligne.produit?.nom || 'Produit inconnu'}</TableCell>
+                                <TableCell>{ligne.product?.nom || 'Produit inconnu'}</TableCell>
                                 <TableCell align="right">{ligne.quantite}</TableCell>
                                 <TableCell align="right">${ligne.prixUnitaire.toFixed(2)}</TableCell>
                                 <TableCell align="right">

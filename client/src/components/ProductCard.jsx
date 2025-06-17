@@ -26,20 +26,20 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 
-const ProductCard = ({ produit, onEdit, onDelete }) => {
+const ProductCard = ({ product, onEdit, onDelete }) => {
   // State for hover effects
   const [hover, setHover] = React.useState(false);
   const { addToCart } = useCart();
   const { user } = useUser();
   
   // Calculate total stock across all stores (for gestionnaire)
-  const totalStock = produit.stocks
-    ? produit.stocks.reduce((sum, s) => sum + s.quantite, 0)
+  const totalStock = product.stocks
+    ? product.stocks.reduce((sum, s) => sum + s.quantite, 0)
     : 0;
     
   // Get stock for the current store (for client)
-  const currentStoreStock = produit.stocks
-    ? produit.stocks.find(s => s.magasinId === user?.magasinId)?.quantite || 0
+  const currentStoreStock = product.stocks
+    ? product.stocks.find(s => s.magasinId === user?.magasinId)?.quantite || 0
     : 0;
     
   // Determine which stock value to display based on user role
@@ -74,9 +74,9 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
         {/* Product name and price header */}
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            {produit.nom}
+            {product.nom}
           </Typography>
-          <Typography variant="h6">${produit.prix.toFixed(2)}</Typography>
+          <Typography variant="h6">${product.prix.toFixed(2)}</Typography>
         </Box>
         
         {/* Stock availability information */}
@@ -107,7 +107,7 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
                   color="primary"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onEdit(produit);
+                    onEdit(product);
                   }}
                 >
                   <EditIcon />
@@ -123,7 +123,7 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
                   color="error"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDelete(produit);
+                    onDelete(product);
                   }}
                 >
                   <DeleteIcon />
@@ -139,7 +139,7 @@ const ProductCard = ({ produit, onEdit, onDelete }) => {
             <Button
               variant="contained"
               startIcon={<AddShoppingCartIcon />}
-              onClick={() => addToCart(produit)}
+              onClick={() => addToCart(product)}
               disabled={currentStoreStock === 0}
               sx={{
                 backgroundColor: currentStoreStock === 0 ? "#bdbdbd" : "#208aff",

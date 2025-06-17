@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-const ProduitDAO = {
+const ProductDAO = {
   /**
    * Find All Products
    * 
@@ -15,7 +15,7 @@ const ProduitDAO = {
    * @returns {Promise<Array>} - Promise resolving to array of products with their stock information
    */
   findAll: async ({ offset = 0, limit = 10, sort } = {}) => {
-    return prisma.produit.findMany({
+    return prisma.product.findMany({
       skip: offset,
       take: limit,
       orderBy: sort ? { [sort]: 'asc' } : undefined,
@@ -32,7 +32,7 @@ const ProduitDAO = {
    * @param {number|string} id - Product ID
    * @returns {Promise<Object|null>} - Promise resolving to product object or null if not found
    */
-  findById: async (id) => prisma.produit.findUnique({ 
+  findById: async (id) => prisma.product.findUnique({ 
     where: { id: Number(id) }, 
     include: { stocks: true } 
   }),
@@ -45,7 +45,7 @@ const ProduitDAO = {
    * @param {Object} data - Product data
    * @returns {Promise<Object>} - Promise resolving to created product
    */
-  insert: async (data) => prisma.produit.create({ data }),
+  insert: async (data) => prisma.product.create({ data }),
   
   /**
    * Insert Product with Default Stock
@@ -59,7 +59,7 @@ const ProduitDAO = {
   insertWithDefaultStock: async (data) => {
     return prisma.$transaction(async (tx) => {
       // First, create the product
-      const product = await tx.produit.create({ data });
+      const product = await tx.product.create({ data });
       
       // Then, get all stores
       const stores = await tx.magasin.findMany();
@@ -76,7 +76,7 @@ const ProduitDAO = {
       }
       
       // Return the product with its stock information
-      return tx.produit.findUnique({
+      return tx.product.findUnique({
         where: { id: product.id },
         include: { stocks: true }
       });
@@ -107,7 +107,7 @@ const ProduitDAO = {
     if (prix !== undefined) updateData.prix = prix;
     if (description !== undefined) updateData.description = description;
     
-    return prisma.produit.update({ 
+    return prisma.product.update({ 
       where: { id: Number(id) }, 
       data: updateData,
       include: { stocks: true }
@@ -139,11 +139,11 @@ const ProduitDAO = {
       });
       
       // Finally, delete the product itself
-      return tx.produit.delete({
+      return tx.product.delete({
         where: { id: numericId }
       });
     });
   }
 };
 
-export default ProduitDAO;
+export default ProductDAO;

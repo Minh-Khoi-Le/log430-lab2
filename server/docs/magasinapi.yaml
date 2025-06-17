@@ -78,7 +78,7 @@ components:
           items:
             type: object
             properties:
-              produitId:
+              producId:
                 type: integer
               quantite:
                 type: integer

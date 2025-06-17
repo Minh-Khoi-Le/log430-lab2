@@ -25,7 +25,7 @@ export async function create(req, res, next) {
     // If lignes is not provided, convert panier to lignes
     if (!lignes && panier) {
       lignes = panier.map(item => ({
-        produitId: item.produitId,
+        productId: item.productId,
         quantite: item.quantite,
         prixUnitaire: item.prix
       }));
@@ -45,17 +45,17 @@ export async function create(req, res, next) {
     for (const ligne of lignes) {
       const stock = await prisma.stock.findFirst({
         where: { 
-          produitId: parseInt(ligne.produitId), 
+          productId: parseInt(ligne.productId), 
           magasinId: parseInt(magasinId) 
         }
       });
       
       if (!stock || stock.quantite < ligne.quantite) {
-        const produit = await prisma.produit.findUnique({ 
-          where: { id: parseInt(ligne.produitId) } 
+        const product = await prisma.product.findUnique({ 
+          where: { id: parseInt(ligne.productId) } 
         });
         return res.status(400).json({ 
-          error: `Stock insuffisant pour ${produit ? produit.nom : 'un produit'}`
+          error: `Stock insuffisant pour ${product ? product.nom : 'un produit'}`
         });
       }
     }
@@ -73,7 +73,7 @@ export async function create(req, res, next) {
           total: parseFloat(total),
           lignes: {
             create: lignes.map(ligne => ({
-              produitId: parseInt(ligne.produitId),
+              productId: parseInt(ligne.productId),
               quantite: parseInt(ligne.quantite),
               prixUnitaire: parseFloat(ligne.prixUnitaire)
             }))
@@ -86,7 +86,7 @@ export async function create(req, res, next) {
       for (const ligne of lignes) {
         await tx.stock.updateMany({
           where: { 
-            produitId: parseInt(ligne.produitId), 
+            productId: parseInt(ligne.productId), 
             magasinId: parseInt(magasinId) 
           },
           data: { 

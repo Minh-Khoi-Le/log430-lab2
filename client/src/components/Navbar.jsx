@@ -144,7 +144,7 @@ function Navbar() {
               fontSize: 17
             }}
           >
-            Produits
+            Product
           </Link>
           
           {/* Dashboard link - only for gestionnaire role */}

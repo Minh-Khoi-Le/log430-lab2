@@ -8,20 +8,20 @@ CREATE TABLE "Magasin" (
 );
 
 -- CreateTable
-CREATE TABLE "Produit" (
+CREATE TABLE "Product" (
     "id" SERIAL NOT NULL,
     "nom" TEXT NOT NULL,
     "prix" DOUBLE PRECISION NOT NULL,
     "description" TEXT,
 
-    CONSTRAINT "Produit_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Stock" (
     "id" SERIAL NOT NULL,
     "magasinId" INTEGER NOT NULL,
-    "produitId" INTEGER NOT NULL,
+    "productId" INTEGER NOT NULL,
     "quantite" INTEGER NOT NULL,
 
     CONSTRAINT "Stock_pkey" PRIMARY KEY ("id")
@@ -52,7 +52,7 @@ CREATE TABLE "Vente" (
 CREATE TABLE "LigneVente" (
     "id" SERIAL NOT NULL,
     "venteId" INTEGER NOT NULL,
-    "produitId" INTEGER NOT NULL,
+    "productId" INTEGER NOT NULL,
     "quantite" INTEGER NOT NULL,
     "prixUnitaire" DOUBLE PRECISION NOT NULL,
 
@@ -62,7 +62,7 @@ CREATE TABLE "LigneVente" (
 -- CreateTable
 CREATE TABLE "Restock" (
     "id" SERIAL NOT NULL,
-    "produitId" INTEGER NOT NULL,
+    "productId" INTEGER NOT NULL,
     "magasinId" INTEGER NOT NULL,
     "quantite" INTEGER NOT NULL,
     "statut" TEXT NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE "Restock" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Stock_magasinId_produitId_key" ON "Stock"("magasinId", "produitId");
+CREATE UNIQUE INDEX "Stock_magasinId_productId_key" ON "Stock"("magasinId", "productId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_nom_key" ON "User"("nom");
@@ -81,7 +81,7 @@ CREATE UNIQUE INDEX "User_nom_key" ON "User"("nom");
 ALTER TABLE "Stock" ADD CONSTRAINT "Stock_magasinId_fkey" FOREIGN KEY ("magasinId") REFERENCES "Magasin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Stock" ADD CONSTRAINT "Stock_produitId_fkey" FOREIGN KEY ("produitId") REFERENCES "Produit"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Stock" ADD CONSTRAINT "Stock_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Vente" ADD CONSTRAINT "Vente_magasinId_fkey" FOREIGN KEY ("magasinId") REFERENCES "Magasin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -93,10 +93,10 @@ ALTER TABLE "Vente" ADD CONSTRAINT "Vente_userId_fkey" FOREIGN KEY ("userId") RE
 ALTER TABLE "LigneVente" ADD CONSTRAINT "LigneVente_venteId_fkey" FOREIGN KEY ("venteId") REFERENCES "Vente"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "LigneVente" ADD CONSTRAINT "LigneVente_produitId_fkey" FOREIGN KEY ("produitId") REFERENCES "Produit"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LigneVente" ADD CONSTRAINT "LigneVente_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Restock" ADD CONSTRAINT "Restock_produitId_fkey" FOREIGN KEY ("produitId") REFERENCES "Produit"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Restock" ADD CONSTRAINT "Restock_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Restock" ADD CONSTRAINT "Restock_magasinId_fkey" FOREIGN KEY ("magasinId") REFERENCES "Magasin"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

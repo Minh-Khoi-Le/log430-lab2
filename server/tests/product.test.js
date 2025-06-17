@@ -42,10 +42,10 @@ afterAll(async () => {
   // Clean up test data
   if (createdProductId) {
     await prisma.stock.deleteMany({
-      where: { produitId: createdProductId }
+      where: { productId: createdProductId }
     });
     
-    await prisma.produit.delete({
+    await prisma.product.delete({
       where: { id: createdProductId }
     });
   }

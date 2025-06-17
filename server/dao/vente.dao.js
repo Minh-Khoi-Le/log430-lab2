@@ -24,7 +24,7 @@ const VenteDAO = {
         total: parseFloat(total),
         lignes: {
           create: lignes.map(ligne => ({
-            produitId: parseInt(ligne.produitId),
+            productId: parseInt(ligne.productId),
             quantite: parseInt(ligne.quantite),
             prixUnitaire: parseFloat(ligne.prixUnitaire)
           }))
@@ -46,7 +46,7 @@ const VenteDAO = {
   getByUser: async (userId) =>
     prisma.vente.findMany({
       where: { userId: parseInt(userId) },
-      include: { lignes: { include: { produit: true } }, magasin: true }
+      include: { lignes: { include: { product: true } }, magasin: true }
     }),
   
   /**
@@ -65,7 +65,7 @@ const VenteDAO = {
     const query = {
       where: { magasinId: parseInt(storeId) },
       include: { 
-        lignes: { include: { produit: true } }, 
+        lignes: { include: { product: true } }, 
         user: true 
       },
       orderBy: { date: 'desc' }

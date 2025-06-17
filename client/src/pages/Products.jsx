@@ -26,11 +26,11 @@ import AddIcon from "@mui/icons-material/Add";
 
 const Products = () => {
   // State management for products and UI
-  const [produits, setProduits] = useState([]);
+  const [products, setProducts] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [produitASupprimer, setProduitASupprimer] = useState(null);
+  const [productToDelete, setProductToDelete] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [produitAModifier, setProduitAModifier] = useState(null);
+  const [productToEdit, setProductToEdit] = useState(null);
   const [hideUnavailable, setHideUnavailable] = useState(false);
   const [error, setError] = useState(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -42,12 +42,12 @@ const Products = () => {
    * 
    * Retrieves the product catalog from the backend and updates state
    */
-  const fetchProduits = async () => {
+  const fetchProducts = async () => {
     try {
       const response = await fetch("http://localhost:3000/api/v1/products");
       if (!response.ok) throw new Error("Erreur lors du chargement des produits");
       const data = await response.json();
-      setProduits(data);
+      setProducts(data);
     } catch (error) {
       console.error("Erreur:", error);
       setError("Erreur lors du chargement des produits");
@@ -56,7 +56,7 @@ const Products = () => {
 
   // Load products when component mounts
   useEffect(() => {
-    fetchProduits();
+    fetchProducts();
   }, []);
 
   /**
@@ -67,8 +67,8 @@ const Products = () => {
    */
   
   // Delete product handling
-  const handleDelete = produit => {
-    setProduitASupprimer(produit);
+  const handleDelete = product => {
+    setProductToDelete(product);
     setModalOpen(true);
   };
   
@@ -77,7 +77,7 @@ const Products = () => {
     try {
       setError(null);
       
-      const response = await fetch(`http://localhost:3000/api/v1/products/${produitASupprimer.id}`, {
+      const response = await fetch(`http://localhost:3000/api/v1/products/${productToDelete.id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${user.token || 'dummy-token'}`
@@ -99,8 +99,8 @@ const Products = () => {
       }
       
       setModalOpen(false);
-      setProduitASupprimer(null);
-      fetchProduits();
+      setProductToDelete(null);
+      fetchProducts();
     } catch (err) {
       console.error("Erreur:", err);
       setError(err.message);
@@ -111,26 +111,26 @@ const Products = () => {
   // Cancel product deletion
   const cancelDelete = () => {
     setModalOpen(false);
-    setProduitASupprimer(null);
+    setProductToDelete(null);
   };
   
   // Edit product handling
-  const handleEdit = produit => {
-    setProduitAModifier(produit);
+  const handleEdit = product => {
+    setProductToEdit(product);
     setEditModalOpen(true);
   };
   
   // Save product edits
-  const saveEdit = async majProduit => {
+  const saveEdit = async editedProduct => {
     try {
       // Create a copy of the product with only the fields we want to update
       const productToUpdate = {
-        name: majProduit.nom,
-        price: majProduit.prix,
-        description: majProduit.description
+        name: editedProduct.nom,
+        price: editedProduct.prix,
+        description: editedProduct.description
       };
       
-      const response = await fetch(`http://localhost:3000/api/v1/products/${majProduit.id}`, {
+      const response = await fetch(`http://localhost:3000/api/v1/products/${editedProduct.id}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
@@ -154,8 +154,8 @@ const Products = () => {
       }
       
       setEditModalOpen(false);
-      setProduitAModifier(null);
-      fetchProduits();
+      setProductToEdit(null);
+      fetchProducts();
     } catch (err) {
       console.error("Erreur:", err);
       setError(err.message);
@@ -166,7 +166,7 @@ const Products = () => {
   // Cancel product edit
   const cancelEdit = () => {
     setEditModalOpen(false);
-    setProduitAModifier(null);
+    setProductToEdit(null);
   };
   
   // Open add product modal
@@ -212,7 +212,7 @@ const Products = () => {
       }
       
       setAddModalOpen(false);
-      fetchProduits();
+      fetchProducts();
     } catch (err) {
       console.error("Erreur:", err);
       setError(err.message);
@@ -281,7 +281,7 @@ const Products = () => {
       }}>
         {/* Product list with conditional edit/delete actions based on user role */}
         <ProductList
-          produits={produits}
+          products={products}
           onDelete={user.role === "gestionnaire" ? handleDelete : undefined}
           onEdit={user.role === "gestionnaire" ? handleEdit : undefined}
           hideUnavailable={hideUnavailable}
@@ -294,7 +294,7 @@ const Products = () => {
           onClose={cancelEdit}
         >
           <ProductEditForm
-            produit={produitAModifier}
+            product={productToEdit}
             onSave={saveEdit}
             onCancel={cancelEdit}
           />
@@ -307,7 +307,7 @@ const Products = () => {
           onClose={handleCloseAddModal}
         >
           <ProductEditForm
-            produit={{ nom: "", prix: 0, stocks: [] }}
+            product={{ nom: "", prix: 0, stocks: [] }}
             onSave={handleAddProduct}
             onCancel={handleCloseAddModal}
             isNewProduct
@@ -322,7 +322,7 @@ const Products = () => {
           onConfirm={confirmDelete}
         >
           <div style={{ margin: "16px 0 0 0" }}>
-            Êtes-vous sûr de vouloir supprimer <b>{produitASupprimer?.nom}</b> ?
+            Êtes-vous sûr de vouloir supprimer <b>{productToDelete?.nom}</b> ?
           </div>
         </Modal>
         

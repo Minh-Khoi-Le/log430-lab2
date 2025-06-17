@@ -31,14 +31,14 @@ const MagasinDAO = {
       const store = await tx.magasin.create({ data });
       
       // Then, get all existing products
-      const products = await tx.produit.findMany();
+      const products = await tx.product.findMany();
       
       // Create stock entries with quantity 0 for each product
       for (const product of products) {
         await tx.stock.create({
           data: {
             magasinId: store.id,
-            produitId: product.id,
+            productId: product.id,
             quantite: 0
           }
         });
@@ -47,7 +47,7 @@ const MagasinDAO = {
       // Return the store with its stock information
       return tx.magasin.findUnique({
         where: { id: store.id },
-        include: { stocks: { include: { produit: true } } }
+        include: { stocks: { include: { product: true } } }
       });
     });
   },

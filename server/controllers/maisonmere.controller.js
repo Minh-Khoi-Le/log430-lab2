@@ -24,18 +24,18 @@ export async function stats(req, res, next) {
           include: { lignes: true },
         });
         let chiffreAffaires = 0;
-        let produitsVendus = 0;
+        let productsVendus = 0;
         ventes.forEach((vente) => {
           vente.lignes.forEach((ligne) => {
             chiffreAffaires += ligne.prixUnitaire * ligne.quantite;
-            produitsVendus += ligne.quantite;
+            productsVendus += ligne.quantite;
           });
         });
         return {
           id: magasin.id,
           nom: magasin.nom,
           ventesTotal: ventes.length,
-          produitsVendus,
+          productsVendus,
           chiffreAffaires,
         };
       })
